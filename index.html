@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RefillRx Pharmacy Portal - Handrail Human Consent Layer</title>
+  <meta name="description" content="Handrail is a WebMCP-native human-control and consent layer for AI agents acting on behalf of screen-reader and keyboard-only users in an accessible pharmacy portal.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <!-- Accessible Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Global Screen Reader Live Region Announcer -->
+  <div id="accessibility-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Pharmacy Header -->
+  <header class="site-header" role="banner">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-logo-text" id="portal-title">REFILLRX</div>
+        <span class="brand-tagline">Your Accessible Patient Prescription Portal</span>
+      </div>
+
+      <div class="header-status-area">
+        <div class="handrail-shield-badge" id="handrail-status-pill" role="status" aria-label="Handrail Status: Active and Enforced">
+          <span class="shield-dot" aria-hidden="true"></span>
+          <span>HANDRAIL CONSENT LAYER: <strong>ACTIVE</strong></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Landmark -->
+  <main id="main-content" class="main-container" role="main">
+    <div class="page-intro">
+      <h1 class="page-title">RefillRx Patient Prescription Management</h1>
+      <p class="page-subtitle">
+        Review your active prescriptions, set your Handrail Authority Contract parameters, and safely authorize medication refills with accessible human-in-the-loop consent.
+      </p>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Main Column: Clinical & Operational Flow -->
+      <div class="main-column">
+        
+        <!-- Fictional Patient / User Area -->
+        <section class="panel-card" aria-labelledby="patient-heading" id="patient-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="patient-heading" class="panel-heading">Verified Patient Record</h2>
+              <p class="panel-subtitle">Deterministic Fictional Identity for Demo &amp; Audit</p>
+            </div>
+            <span class="badge-eligible eligibility-badge">Account Verified</span>
+          </div>
+          <div id="patient-details-content">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </section>
+
+        <!-- Prescription Catalog / List -->
+        <section class="panel-card" aria-labelledby="prescriptions-heading" id="prescriptions-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="prescriptions-heading" class="panel-heading">Your Prescriptions</h2>
+              <p class="panel-subtitle">Lisinopril, Atorvastatin, and Metformin &mdash; Select to view details or stage for refill</p>
+            </div>
+            <span class="rx-id-pill" id="rx-count-badge">3 Prescriptions</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="accessible-table" aria-label="Your Prescriptions on File">
+              <thead>
+                <tr>
+                  <th scope="col">Medication &amp; Strength</th>
+                  <th scope="col">Rx ID</th>
+                  <th scope="col">Refills</th>
+                  <th scope="col">Copay Price</th>
+                  <th scope="col">Eligibility</th>
+                  <th scope="col"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="prescriptions-table-body">
+                <!-- Rendered by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Prescription Details & Refill Preparation -->
+        <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <!-- Prescription Details -->
+          <section class="panel-card" aria-labelledby="details-heading" id="details-section">
+            <div class="panel-header">
+              <h3 id="details-heading" class="panel-heading">Prescription Details</h3>
+            </div>
+            <div id="prescription-detail-content">
+              <!-- Rendered by JavaScript -->
+            </div>
+          </section>
+
+          <!-- Refill Preparation & Staging State -->
+          <section class="panel-card" aria-labelledby="refill-prep-heading" id="refill-prep-section">
+            <div class="panel-header">
+              <div>
+                <h3 id="refill-prep-heading" class="panel-heading">Refill Order Staging</h3>
+                <p class="panel-subtitle">Pre-flight check against Handrail policy</p>
+              </div>
+            </div>
+            <div id="refill-preparation-content">
+              <!-- Rendered by JavaScript -->
+            </div>
+          </section>
+        </div>
+
+        <!-- Plain-Language Action Outcome & Transaction Receipt -->
+        <section class="panel-card" aria-labelledby="receipt-heading" id="receipt-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="receipt-heading" class="panel-heading">Result / Audit Receipt</h2>
+              <p class="panel-subtitle">Transparent accountability distinguishing user authorization, agent request, Handrail decision, and final outcome</p>
+            </div>
+          </div>
+
+          <div id="receipt-display-container" role="region" aria-live="polite" aria-label="Latest Transaction Outcome and Receipt">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </section>
+
+        <!-- WebMCP Tool Registry & Deterministic Tool-Trust Inspector -->
+        <section class="panel-card" aria-labelledby="registry-heading" id="registry-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="registry-heading" class="panel-heading">WebMCP Tool Registry &amp; Trust Inspector</h2>
+              <p class="panel-subtitle">First-party tool metadata, explicit read-only/mutating classification, and deterministic trust verification</p>
+            </div>
+            <span class="rx-id-pill" id="registry-count-badge">5 Expected Tools Active</span>
+          </div>
+
+          <!-- Deterministic Security Boundary Pipeline Diagram -->
+          <div class="security-ordering-card">
+            <h3 class="security-ordering-heading">
+              <span aria-hidden="true">🛡️</span> Handrail 4-Gate Execution Pipeline &amp; Security Boundary
+            </h3>
+            <div class="pipeline-flow" role="list" aria-label="Security Execution Order">
+              <div class="pipeline-step" role="listitem">1. Tool Invocation</div>
+              <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
+              <div class="pipeline-step step-trust" role="listitem">
+                <strong>Gate 1: Tool Trust</strong><br>
+                <small>Squatting &bull; Injections</small>
+              </div>
+              <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
+              <div class="pipeline-step step-authority" role="listitem">
+                <strong>Gate 2: Authority Policy</strong><br>
+                <small>Scope &bull; Spend Limit</small>
+              </div>
+              <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
+              <div class="pipeline-step step-confirmation" role="listitem">
+                <strong>Gate 3: Human Consent</strong><br>
+                <small>If Consequential</small>
+              </div>
+              <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
+              <div class="pipeline-step step-exec" role="listitem">
+                <strong>Gate 4: Execution</strong><br>
+                <small>Pharmacy Action</small>
+              </div>
+            </div>
+            <p class="pipeline-note">
+              <strong>Fail-Closed Security Principle:</strong> Tool-Trust (Gate 1) runs before Authority (Gate 2) and Confirmation (Gate 3). Suspicious tools or unauthorized modifications fail closed immediately and <strong>NEVER reach human confirmation</strong>.
+            </p>
+          </div>
+
+          <!-- Registered Tools List -->
+          <div class="registry-container" style="margin-top: 1rem;">
+            <div class="registry-meta-summary">
+              <div>
+                <strong>Active Session Baseline:</strong> <code id="active-session-id-display">SESSION-RX-2025-001</code>
+              </div>
+              <div>
+                <span>Unmarked Tool Policy: <strong>Default Mutating (Never Safe)</strong></span>
+              </div>
+            </div>
+            <div id="registered-tools-list" class="registered-tools-grid">
+              <!-- Rendered by JavaScript -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Accessible Structured Audit Trail -->
+        <section class="panel-card" aria-labelledby="audit-heading" id="audit-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="audit-heading" class="panel-heading">Structured Audit Trail</h2>
+              <p class="panel-subtitle">Deterministic session record of all agent invocations, policy evaluations, and human consent decisions</p>
+            </div>
+            <span class="badge-refill-available rx-refills-badge" id="audit-count-badge">0 events</span>
+          </div>
+
+          <div class="audit-controls-bar">
+            <!-- Filter by Decision Type -->
+            <div class="audit-filter-group" role="group" aria-label="Filter Audit Logs by Decision">
+              <span class="filter-label">Filter:</span>
+              <button type="button" class="btn-filter filter-active" data-filter="all" aria-pressed="true">All</button>
+              <button type="button" class="btn-filter" data-filter="executed" aria-pressed="false">Executed</button>
+              <button type="button" class="btn-filter" data-filter="blocked" aria-pressed="false">Blocked</button>
+              <button type="button" class="btn-filter" data-filter="denied" aria-pressed="false">Denied</button>
+              <button type="button" class="btn-filter" data-filter="confirmed" aria-pressed="false">Confirmed</button>
+              <button type="button" class="btn-filter" data-filter="allowed" aria-pressed="false">Allowed</button>
+            </div>
+
+            <div class="audit-btn-actions">
+              <button type="button" class="btn btn-secondary btn-sm" id="export-audit-btn" aria-label="Export audit log as JSON file">
+                Export JSON
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="clear-audit-btn" aria-label="Clear session audit logs">
+                Clear Logs
+              </button>
+            </div>
+          </div>
+
+          <div id="audit-log-container" role="region" aria-live="polite" aria-label="Audit Log Entries">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </section>
+
+        <!-- Automated Deterministic Test Suite Runner -->
+        <section class="panel-card" aria-labelledby="tests-heading" id="tests-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="tests-heading" class="panel-heading">Authority Contract Verification Suite</h2>
+              <p class="panel-subtitle">Run automated policy evaluation tests and cryptographic verification</p>
+            </div>
+            <button type="button" class="btn btn-primary" id="run-tests-btn">
+              Run Test Suite
+            </button>
+          </div>
+          <div id="test-results-container">
+            <p class="text-muted">Click &ldquo;Run Test Suite&rdquo; to execute deterministic test suite verifying contract bounds, spend caps, and WebMCP definitions.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Side Column: Handrail Governance, Trust, & Agent Simulation -->
+      <aside class="side-column" aria-label="Handrail Agent Governance and Simulation Controls">
+        
+        <!-- AGENT ACTIVITY Panel -->
+        <section class="panel-card" aria-labelledby="agent-activity-heading" id="agent-activity-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="agent-activity-heading" class="panel-heading">AGENT ACTIVITY</h2>
+              <p class="panel-subtitle">Current authority bounds &amp; recent agent action</p>
+            </div>
+            <span class="activity-live-badge" aria-label="Monitoring agent actions in real time">
+              <span class="shield-dot" aria-hidden="true"></span>
+              <span>LIVE</span>
+            </span>
+          </div>
+
+          <div class="agent-activity-content">
+            <!-- Current Authority Box -->
+            <div class="activity-box">
+              <span class="activity-box-label">Current Authority:</span>
+              <div id="activity-current-authority" class="activity-box-value">
+                <strong>Lisinopril 10 mg (RX-001)</strong> &bull; Prepare &amp; submit &bull; Max spend: $25.00
+              </div>
+            </div>
+
+            <!-- Recent Action Box -->
+            <div class="activity-box">
+              <span class="activity-box-label">Recent Action:</span>
+              <div id="activity-recent-action" class="activity-box-value">
+                <span class="text-muted">Session initialized with default contract.</span>
+              </div>
+            </div>
+
+            <!-- Tool / Security Status -->
+            <div class="activity-box">
+              <span class="activity-box-label">Tool / Security Status:</span>
+              <div id="agent-status-indicator" class="agent-status status-idle" role="status" aria-live="polite">
+                ● Ready / Idle (Waiting for agent task)
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- HANDRAIL AUTHORITY Panel -->
+        <section class="panel-card" aria-labelledby="authority-heading" id="authority-controls-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="authority-heading" class="panel-heading">HANDRAIL AUTHORITY</h2>
+              <p class="panel-subtitle">Set deterministic boundaries for AI agent actions</p>
+            </div>
+            <span class="rx-id-pill" id="contract-id-badge">AUTH-CTR-2025-001</span>
+          </div>
+
+          <form id="authority-contract-form" onsubmit="event.preventDefault();">
+            <fieldset class="authority-form-fieldset">
+              <legend class="sr-only">Handrail Agent Policy Configuration</legend>
+
+              <!-- 1. Allowed Medications Scope -->
+              <fieldset class="authority-subset" id="medication-scope-fieldset">
+                <legend class="authority-subset-legend">Allowed Medications</legend>
+                <p class="form-hint" id="med-scope-hint">Select the specific prescriptions the AI agent is authorized to act on:</p>
+                <ul class="scope-checklist" aria-describedby="med-scope-hint" id="scope-prescriptions-list">
+                  <li class="scope-checkbox-item">
+                    <input
+                      type="checkbox"
+                      id="scope-rx-001"
+                      name="authorizedRx"
+                      value="RX-001"
+                      class="form-checkbox"
+                      checked>
+                    <label for="scope-rx-001" class="scope-label-content">
+                      <span class="scope-med-name">Lisinopril 10 mg &mdash; RX-001</span>
+                      <span class="scope-med-meta">Oral Tablet &bull; $12.40 &bull; 2 refills</span>
+                    </label>
+                  </li>
+                  <li class="scope-checkbox-item">
+                    <input
+                      type="checkbox"
+                      id="scope-rx-002"
+                      name="authorizedRx"
+                      value="RX-002"
+                      class="form-checkbox">
+                    <label for="scope-rx-002" class="scope-label-content">
+                      <span class="scope-med-name">Atorvastatin 20 mg &mdash; RX-002</span>
+                      <span class="scope-med-meta">Oral Tablet &bull; $18.75 &bull; 1 refill</span>
+                    </label>
+                  </li>
+                  <li class="scope-checkbox-item">
+                    <input
+                      type="checkbox"
+                      id="scope-rx-003"
+                      name="authorizedRx"
+                      value="RX-003"
+                      class="form-checkbox">
+                    <label for="scope-rx-003" class="scope-label-content">
+                      <span class="scope-med-name">Metformin 500 mg &mdash; RX-003</span>
+                      <span class="scope-med-meta">Extended Release &bull; $9.20 &bull; 0 refills</span>
+                    </label>
+                  </li>
+                </ul>
+              </fieldset>
+
+              <!-- 2. Action Scope -->
+              <fieldset class="authority-subset" id="action-scope-fieldset">
+                <legend class="authority-subset-legend">Action Scope</legend>
+                <p class="form-hint" id="action-scope-hint">Control whether the agent may only stage orders or also submit them:</p>
+                <div class="radio-group-container" role="radiogroup" aria-describedby="action-scope-hint">
+                  <label class="radio-option-item">
+                    <input
+                      type="radio"
+                      id="action-scope-prepare-only"
+                      name="actionScope"
+                      value="prepare_only"
+                      class="form-radio">
+                    <span><strong>Prepare only</strong> (Agent may stage refill calculations; human must submit)</span>
+                  </label>
+                  <label class="radio-option-item">
+                    <input
+                      type="radio"
+                      id="action-scope-prepare-submit"
+                      name="actionScope"
+                      value="prepare_and_submit"
+                      class="form-radio"
+                      checked>
+                    <span><strong>Prepare &amp; submit</strong> (Agent may stage and initiate refill submission)</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <!-- 3. Maximum Amount & Spending Limits -->
+              <fieldset class="authority-subset" id="spend-limits-fieldset">
+                <legend class="authority-subset-legend">Maximum Amount &amp; Limits</legend>
+
+                <div class="form-group">
+                  <label for="contract-max-spend" class="form-label">Maximum Spend Limit ($ USD):</label>
+                  <input
+                    type="number"
+                    id="contract-max-spend"
+                    name="maxSpend"
+                    class="form-input"
+                    min="0"
+                    max="500"
+                    step="0.50"
+                    value="25.00"
+                    aria-describedby="max-spend-hint">
+                  <span id="max-spend-hint" class="form-hint">Agent cannot execute or prepare orders exceeding this cap.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="contract-threshold" class="form-label">Human Confirmation Threshold ($ USD):</label>
+                  <input
+                    type="number"
+                    id="contract-threshold"
+                    name="threshold"
+                    class="form-input"
+                    min="0"
+                    max="100"
+                    step="0.50"
+                    value="15.00"
+                    aria-describedby="threshold-hint">
+                  <span id="threshold-hint" class="form-hint">Refills at or above this amount require accessible human authorization.</span>
+                </div>
+
+                <div class="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="contract-require-confirm"
+                    name="requireConfirm"
+                    class="form-checkbox"
+                    checked>
+                    <label for="contract-require-confirm" class="form-label">
+                    Require explicit human confirmation before submission
+                  </label>
+                </div>
+              </fieldset>
+
+              <div class="contract-actions-bar">
+                <div id="contract-save-status" class="contract-save-status" role="status" aria-live="polite">
+                  Contract active
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="reset-contract-btn">
+                    Reset Defaults
+                  </button>
+                  <button type="submit" class="btn btn-primary btn-sm" id="save-contract-btn">
+                    Save Authority
+                  </button>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </section>
+
+        <!-- SECURITY / TRUST STATUS Panel -->
+        <section class="panel-card" aria-labelledby="trust-heading" id="trust-panel-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="trust-heading" class="panel-heading">SECURITY / TRUST STATUS</h2>
+              <p class="panel-subtitle">Cryptographic bounds &amp; deterministic policy metrics</p>
+            </div>
+          </div>
+
+          <div class="trust-metrics-grid">
+            <div class="metric-card">
+              <span class="metric-num" id="metric-invocations">0</span>
+              <span class="metric-lbl">Total Calls</span>
+            </div>
+            <div class="metric-card metric-card-approved">
+              <span class="metric-num" id="metric-approved">0</span>
+              <span class="metric-lbl"><span aria-hidden="true">✓</span> Approved</span>
+            </div>
+            <div class="metric-card metric-card-blocked">
+              <span class="metric-num" id="metric-blocked">0</span>
+              <span class="metric-lbl"><span aria-hidden="true">⛔</span> Blocked</span>
+            </div>
+            <div class="metric-card metric-card-confirm">
+              <span class="metric-num" id="metric-confirmations">0</span>
+              <span class="metric-lbl"><span aria-hidden="true">⚠️</span> Confirmations</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <span class="field-label">Contract SHA-256 Fingerprint:</span>
+            <div class="fingerprint-display" id="contract-fingerprint" aria-label="Cryptographic Fingerprint of Active Contract">
+              Computing hash...
+            </div>
+          </div>
+        </section>
+
+        <!-- DEVELOPER / DEMO CONTROLS Panel -->
+        <section class="panel-card" aria-labelledby="agent-controls-heading" id="agent-demo-section">
+          <div class="panel-header">
+            <div>
+              <div class="dev-banner-badge">Developer / Demo Mode</div>
+              <h2 id="agent-controls-heading" class="panel-heading">DEVELOPER / DEMO CONTROLS</h2>
+              <p class="panel-subtitle">Interactive WebMCP agent scenarios with <strong>NO security bypass</strong>.</p>
+            </div>
+          </div>
+
+          <div class="simulation-actions-list">
+            <!-- Primary Demo Scenarios Group -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Primary Demo Scenarios</span>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-full demo-flow-btn" id="sim-run-successful-flow" aria-label="Run Full Successful Agent Flow: Search to Details to Prepare to Submit">
+              <span class="btn-icon">▶</span>
+              <div class="btn-text-block">
+                <strong>Run Successful Agent Flow</strong>
+                <span class="btn-subtext">Search → Details → Prepare ($12.40) → Human Confirmation → Refill</span>
+              </div>
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="Simulate Out-of-Scope Medication Refill Attempt">
+              <span class="btn-icon">⛔</span>
+              <div class="btn-text-block">
+                <strong>Simulate: Out-of-Scope Medication</strong>
+                <span class="btn-subtext">Attempt submit_refill(RX-002) with Lisinopril-only authority → Blocked</span>
+              </div>
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="Simulate Amount Limit Exceeded Refill Attempt">
+              <span class="btn-icon">⛔</span>
+              <div class="btn-text-block">
+                <strong>Simulate: Amount Limit Failure</strong>
+                <span class="btn-subtext">Set max spend $10.00, attempt $12.40 Lisinopril refill → Blocked</span>
+              </div>
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="Simulate Prepare-Only Restriction Refill Attempt">
+              <span class="btn-icon">⚠️</span>
+              <div class="btn-text-block">
+                <strong>Simulate: Prepare-Only Restriction</strong>
+                <span class="btn-subtext">Prepare allowed → submit_refill blocked with NO confirmation</span>
+              </div>
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="Simulate Suspicious Security Trap Tool Call">
+              <span class="btn-icon">🛡️</span>
+              <div class="btn-text-block">
+                <strong>Simulate: Suspicious Security Trap</strong>
+                <span class="btn-subtext">Call update_payment_method → Gate 1 Trust check fails closed</span>
+              </div>
+            </button>
+
+            <!-- Individual Canonical Step Controls -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Individual Tool Step Simulator</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-search-medications">
+              1. search_medications (Read-Only Search)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-view-details-lisinopril">
+              2. view_prescription_details (RX-001 Lisinopril 10mg)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-view-details-metformin">
+              3. view_prescription_details (RX-003 Metformin 500mg)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-stage-lisinopril">
+              4. prepare_refill (Stage Lisinopril $12.40)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-stage-atorvastatin">
+              5. prepare_refill (Stage Atorvastatin $18.75)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-submit-authorized">
+              6. submit_refill (Submit Staged Refill)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-submit-ineligible">
+              7. submit_refill (Metformin - 0 Refills Ineligible)
+            </button>
+
+            <!-- Security Trap & Mid-Session Trust Demos -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Security Trap &amp; Mid-Session Trust Tests</span>
+            </div>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Simulate unexpected tool registration during active session">
+              Simulate Unexpected Mid-Session Registration
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Simulate calling update_payment_method trap tool">
+              Simulate: update_payment_method (Direct Call)
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Simulate calling typosquatted tool submit-refill">
+              Simulate: Typosquat Separator (submit-refill)
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Simulate calling typosquatted tool submit_refil">
+              Simulate: Typosquat Edit Distance (submit_refil)
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Simulate calling suffix squatted tool submit_refill_v2">
+              Simulate: Suffix Squatting (submit_refill_v2)
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Simulate registering a tool with prompt injection description">
+              Simulate: Injected Description (fast_refill_helper)
+            </button>
+
+            <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Simulate invoking an unknown unmarked tool">
+              Simulate: Unknown Unregistered Tool
+            </button>
+
+            <!-- Developer Panel Utilities -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Developer Utilities</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary btn-full" id="dev-view-raw-audit-btn" aria-label="View raw structured audit events in JSON viewer">
+                📋 View Raw Audit Events (JSON)
+              </button>
+
+              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-demo-full" aria-label="Reset entire demo state to baseline">
+                ↺ Reset Full Demo State (Contract, Pharmacy, Tools)
+              </button>
+
+              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-registry" aria-label="Reset WebMCP tool registry to baseline">
+                ↺ Reset Tool Registry Only (5 Expected)
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- WebMCP Standard Integration & Runtime Environment -->
+        <section class="panel-card" aria-labelledby="webmcp-info-heading" id="webmcp-info-section">
+          <div class="panel-header">
+            <div>
+              <h2 id="webmcp-info-heading" class="panel-heading">WebMCP Runtime Environment</h2>
+              <p class="panel-subtitle">Canonical browser registration inspection</p>
+            </div>
+            <span id="webmcp-status-badge" class="status-badge status-harness">Inspecting API...</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8125rem;">
+            <div style="background: var(--color-slate-50); border: 1px solid var(--color-slate-200); border-radius: var(--radius-md); padding: 10px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--color-slate-600); font-weight: 500;">document.modelContext:</span>
+                <strong id="webmcp-modelcontext-status" style="font-family: monospace;">Unavailable</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--color-slate-600); font-weight: 500;">registerTool API:</span>
+                <strong id="webmcp-registertool-status" style="font-family: monospace;">Unavailable</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--color-slate-600); font-weight: 500;">Registered Tools:</span>
+                <strong id="webmcp-registered-count" style="font-family: monospace;">5 Canonical Tools</strong>
+              </div>
+            </div>
+            <p id="webmcp-status-desc" style="font-size: 0.8rem; color: var(--color-slate-600); line-height: 1.4; margin: 0;">
+              First-party page-side JavaScript calls <code>document.modelContext.registerTool</code> when present. In standard browsers without native WebMCP flags, the API is not faked or simulated; Handrail operates canonical tools through its deterministic test harness.
+            </p>
+          </div>
+        </section>
+
+      </aside>
+    </div>
+  </main>
+
+  <!-- Accessible Human Confirmation Dialog -->
+  <dialog
+    id="handrail-confirmation-dialog"
+    class="accessible-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dialog-title"
+    aria-describedby="dialog-description">
+    
+    <div class="dialog-header">
+      <h3 id="dialog-title" class="dialog-title">Confirm refill</h3>
+      <div id="dialog-description" class="dialog-policy-alert">
+        <!-- Human readable description injected by JavaScript -->
+      </div>
+    </div>
+
+    <div id="dialog-action-details">
+      <!-- Auditable structured arguments and medication breakdown injected by JavaScript -->
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-secondary" id="dialog-deny-btn" aria-label="Deny refill request">
+        Deny
+      </button>
+      <button type="button" class="btn btn-primary" id="dialog-authorize-btn" aria-label="Approve refill request">
+        Approve refill
+      </button>
+    </div>
+  </dialog>
+
+  <!-- Accessible Raw Audit Events JSON Inspector Dialog -->
+  <dialog
+    id="raw-audit-dialog"
+    class="accessible-dialog raw-audit-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="raw-audit-title"
+    aria-describedby="raw-audit-desc">
+    
+    <div class="dialog-header">
+      <h3 id="raw-audit-title" class="dialog-title">Structured Audit Log (Raw JSON)</h3>
+      <p id="raw-audit-desc" class="panel-subtitle">
+        Cryptographically verifiable session events, policy decisions, and human consent states.
+      </p>
+    </div>
+
+    <div class="raw-audit-content">
+      <pre class="raw-audit-pre" tabindex="0" aria-label="Raw JSON audit events"><code id="raw-audit-json-code">Loading audit events...</code></pre>
+    </div>
+
+    <div class="dialog-actions">
+      <span id="copy-status-msg" class="contract-save-status" role="status" aria-live="polite"></span>
+      <button type="button" class="btn btn-secondary" id="copy-raw-audit-btn" aria-label="Copy JSON to clipboard">
+        Copy to Clipboard
+      </button>
+      <button type="button" class="btn btn-secondary" id="download-raw-audit-btn" aria-label="Download JSON file">
+        Download JSON
+      </button>
+      <button type="button" class="btn btn-primary" id="close-raw-audit-btn" aria-label="Close raw audit dialog">
+        Close
+      </button>
+    </div>
+  </dialog>
+
+  <!-- Site Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-content">
+      <div>
+        <strong>Handrail MVP</strong> &mdash; WebMCP-Native Human Control & Consent Layer for AI Agents.
+      </div>
+      <div>
+        RefillRx Demo Portal &bull; Zero Frameworks &bull; Plain HTML, CSS, & Vanilla JS
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Entry Point -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

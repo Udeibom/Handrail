@@ -1,0 +1,6 @@
+{
+  "name": "Handrail - RefillRx",
+  "description": "WebMCP-native human-control and consent layer for AI agents acting on behalf of screen-reader and keyboard-only users in an accessible pharmacy portal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

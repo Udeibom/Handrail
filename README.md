@@ -1,0 +1,275 @@
+# Handrail — WebMCP Human Consent & Authority Layer
+
+> **An accessibility-first deterministic authority, tool-trust, and human-consent layer for AI agents invoking WebMCP tools on behalf of screen-reader and keyboard-only users.**
+
+---
+
+## Overview
+
+**Handrail** is an open-source, zero-dependency human-control layer for web-based autonomous AI agents. As AI agents gain the ability to interact directly with web applications via the **WebMCP** standard (`document.modelContext`), users—especially those who rely on screen readers and keyboard navigation—require transparent, reliable, and accessible safeguards against unintended, out-of-scope, or malicious tool invocations.
+
+In this demonstration, Handrail is deployed on **RefillRx**, an accessible patient prescription portal. Users establish a structured **Authority Contract** specifying allowed medications, permitted action scopes, and maximum spending limits. Before any WebMCP tool executes, Handrail deterministically checks tool trust and evaluates authority boundaries, presenting an accessible confirmation dialog whenever a consequential action is requested.
+
+---
+
+## The Problem
+
+### The Accessibility and Control Gap
+Autonomous AI agents can execute multi-step workflows rapidly, invoking browser tools, managing accounts, and placing orders. However:
+
+1. **Lack of User Agency for Assistive Tech Users**: Screen-reader and keyboard-only users often cannot perceive rapid background agent actions in real time. Without an explicit, accessible control boundary, an agent could perform irreversible financial or medical actions without the user's informed consent.
+2. **WebMCP Provides Semantics, Not Policy**: WebMCP (`document.modelContext.registerTool`) allows websites to expose structured APIs and schema metadata to AI models. While WebMCP standardizes *how* tools are invoked, it does **not** provide an authorization contract, spend-limit bounds, tool-trust heuristic, or accessible human confirmation gate.
+3. **The Confirmation Fallacy**: Presenting confirmation dialogs for *every* action leads to cognitive overload and approval fatigue, while failing to verify authority bounds beforehand allows malicious or out-of-scope agent requests to harass the user.
+
+---
+
+## The Solution
+
+Handrail introduces a 4-layer defense-in-depth model coupled with accessible confirmation and structured provenance receipts:
+
+```
+                      +------------------------------------------+
+                      |         WebMCP Tool Invocation           |
+                      +------------------------------------------+
+                                           |
+                                           v
+                      +------------------------------------------+
+                      |     Gate 1: Tool-Trust Check             |
+                      |     (Squatting, Injections, Traps)       |
+                      +------------------------------------------+
+                                           |
+                                           v
+                      +------------------------------------------+
+                      |     Gate 2: Deterministic Authority      |
+                      |     (Medication Scope, Spend Caps)       |
+                      +------------------------------------------+
+                                           |
+                                           v
+                      +------------------------------------------+
+                      |     Gate 3: Accessible Confirmation      |
+                      |     (Only if Authorized + Consequential) |
+                      +------------------------------------------+
+                                           |
+                                           v
+                      +------------------------------------------+
+                      |     Gate 4: Stateful Execution           |
+                      |     (Pharmacy Order Placement)           |
+                      +------------------------------------------+
+                                           |
+                                           v
+                      +------------------------------------------+
+                      |     Result / Audit Receipt               |
+                      |     (Structured 5-Facet Provenance)      |
+                      +------------------------------------------+
+```
+
+### The 4 Core Layers:
+
+1. **Tool Registration & Classification**: Tools are registered with explicit metadata (`name`, `description`, `inputSchema`, `readOnlyHint`). Read-only operations (`readOnlyHint: true`) are separated from mutating/consequential operations (`readOnlyHint: false`).
+2. **Authority Contract**: A user-authored, immutable policy configuration defining:
+   - `authorizedPrescriptionIds`: Whitelist of permitted medications (e.g., `["RX-001"]`).
+   - `actionScope`: Permitted operational level (`prepare_only` vs. `prepare_and_submit`).
+   - `maxSpendLimit`: Hard financial ceiling in USD.
+   - `requireHumanConfirmation`: Boolean enforcing human confirmation before final submission.
+   - `confirmationThreshold`: Dollar amount above which confirmation is mandatory.
+3. **Deterministic Authority Check**: A mathematical, zero-hallucination policy evaluator (`evaluateAuthority`) that verifies tool arguments directly against the contract.
+4. **Tool-Trust Check**: Gate 1 heuristic (`checkToolTrust`) detecting tool-name squatting (Levenshtein distance, hyphen/casing variations), instruction-like prompt injections in descriptions, and unexpected mid-session tool registrations.
+
+### Accessible Human Confirmation
+When an action is authorized and consequential, Handrail halts execution and opens a modal `<dialog role="alertdialog">` with strict keyboard focus trapping, high-contrast labels, non-color visual badges, and screen-reader announcements.
+
+### Structured Audit Receipt
+Every decision generates an immutable audit record capturing 5 distinct provenance facets:
+1. **User Authorized**: Exact contract snapshot at execution time.
+2. **Agent Requested**: Structured arguments passed by the AI agent.
+3. **Handrail Decided**: Deterministic verdict (`ALLOWED`, `BLOCKED`, `CONFIRMED`, `DENIED`, `EXECUTED`).
+4. **What Happened**: Human-readable narrative explanation.
+5. **Final Result**: Structured output data, transaction ID, or failure reason.
+
+---
+
+## Security Model & Policy Execution
+
+### Linear Gate Ordering
+Execution follows a strict linear pipeline:
+$$\text{Trust Check (Gate 1)} \longrightarrow \text{Authority Check (Gate 2)} \longrightarrow \text{Human Confirmation (Gate 3)} \longrightarrow \text{Execution (Gate 4)}$$
+
+> **Fail-Closed Principle**: Gate 1 runs before Gate 2 and Gate 3. A suspicious, squatted, or untrusted tool fails closed immediately and **NEVER reaches the human confirmation dialog**.
+
+### Policy Decision Matrix
+
+| Condition | Gate | Verdict | Outcome | Confirmation Dialog? |
+| :--- | :--- | :--- | :--- | :--- |
+| **Untrusted / Squatted Tool** | Gate 1 | `BLOCKED` | Halted immediately (`UNTRUSTED_NAME_SQUATTING`) | **No (Never)** |
+| **Prompt Injection in Description** | Gate 1 | `BLOCKED` | Halted immediately (`UNTRUSTED_INSTRUCTION_DESCRIPTION`) | **No (Never)** |
+| **Out-of-Scope Medication** | Gate 2 | `BLOCKED` | Halted immediately (`BLOCKED_UNAUTHORIZED_RX`) | **No** |
+| **Action Scope Disallowed (`prepare_only`)**| Gate 2 | `BLOCKED` | Halted immediately (`BLOCKED_UNAUTHORIZED_ACTION`) | **No** |
+| **Spend Limit Exceeded ($ > Max)** | Gate 2 | `BLOCKED` | Halted immediately (`BLOCKED_SPEND_LIMIT`) | **No** |
+| **Ineligible Medication (0 Refills)** | Gate 2 | `BLOCKED` | Halted immediately (`BLOCKED_INELIGIBLE_RX`) | **No** |
+| **Authorized Read-Only** | Gate 2 &rarr; 4 | `ALLOWED` | Executed immediately, data returned | **No** |
+| **Authorized Consequential Mutation** | Gate 2 &rarr; 3 &rarr; 4 | `CONFIRMED` | Awaits user approval; executes on approval, aborts on denial | **Yes (Accessible Modal)** |
+
+### Critical Security Rule:
+> **Confirmation does not grant authority.**  
+> Human confirmation only verifies a consequential action that is **already strictly within the Authority Contract**. If an agent attempts an unauthorized action, Handrail blocks it at Gate 2 without prompting the user.
+
+---
+
+## WebMCP Tools
+
+Handrail registers and regulates five primary WebMCP tools:
+
+### 1. `search_medications`
+- **Purpose**: Search the patient's active medication catalog by name or condition.
+- **Classification**: Read-Only (`readOnlyHint: true`).
+- **Security Behavior**: Executes unconditionally across active records. Does not mutate pharmacy state.
+
+### 2. `view_prescription_details`
+- **Purpose**: Retrieve clinical instructions, dosage, copay pricing, and refill counts for a specific prescription ID.
+- **Classification**: Read-Only (`readOnlyHint: true`).
+- **Security Behavior**: Executes unconditionally. Returns detailed medication metadata.
+
+### 3. `prepare_refill`
+- **Purpose**: Pre-calculates order totals and copays, validating parameters without committing changes.
+- **Classification**: Non-Committal Staging (`readOnlyHint: false`, non-committal).
+- **Security Behavior**: Evaluates Gate 1 (Trust) and Gate 2 (Authority). Verifies the prescription ID is in the user's authorized contract and within spend caps. Does **not** decrement refills or submit orders.
+
+### 4. `submit_refill`
+- **Purpose**: Submits a finalized prescription refill order to the pharmacy.
+- **Classification**: Consequential Mutating (`readOnlyHint: false`, mutating).
+- **Security Behavior**: Evaluates Gate 1 (Trust), Gate 2 (Authority), and Gate 3 (Human Confirmation). If approved by the human, decrements refills remaining, commits the order, and issues a confirmation receipt. Preserves exact state invariance if denied or blocked.
+
+### 5. `update_payment_method`
+- **Purpose**: Deliberately registered security trap simulating an agent attempting to modify financial credentials or payment accounts.
+- **Classification**: High-Risk Security Trap (`readOnlyHint: false`).
+- **Security Behavior**: Fails closed at Gate 1 (`UNTRUSTED_INSTRUCTION_DESCRIPTION` / `BLOCKED_SECURITY_TRAP`). Never reaches the user confirmation dialog.
+
+---
+
+## Accessibility (a11y) Implementation
+
+RefillRx and Handrail are engineered from the ground up for full accessibility compliance:
+
+- **Semantic HTML5 Landmarks**: Strict structure using `<header role="banner">`, `<main role="main">`, `<aside>`, `<section>`, and `<footer>`.
+- **Keyboard Navigation**: All interactive elements are reachable via `Tab` / `Shift+Tab` and actionable with `Enter` or `Space`. No mouse-only interactions.
+- **High-Contrast Visible Focus**: Explicit `:focus-visible` outline rings (`3px solid #0284c7` with `2px` offset) ensuring clear keyboard focus visibility.
+- **Accessible Confirmation Modal**:
+  - Implemented using native `<dialog role="alertdialog">` with `aria-modal="true"`.
+  - Accessible name (`aria-labelledby="dialog-title"`) and description (`aria-describedby="dialog-description"`).
+  - Strict **focus trapping** keeping Tab focus inside the active dialog.
+  - Closes safely on `Escape` key, defaulting to a fail-closed denial.
+  - Automatically restores focus to the invoking element upon closure.
+- **Live-Region Announcements**: `aria-live="polite"` and `aria-live="assertive"` regions announce status changes, agent execution results, and policy blocks to screen readers in real time.
+- **No Color-Only State Indicators**: Statuses (`ALLOWED`, `BLOCKED`, `DENIED`, `CONFIRMED`, `EXECUTED`) always combine text tags, structural badges, and unicode symbols so information is never conveyed by color alone.
+- **Reduced Motion**: Respects `prefers-reduced-motion: reduce` by disabling non-essential transitions and animations.
+
+---
+
+## Testing & Verification
+
+### Automated Test Suites
+Handrail includes comprehensive, dependency-free automated test suites running directly on Node.js or in the browser:
+
+```bash
+# Run 4-gate security and fail-closed test suite (39 assertions)
+node tests/security-suite.js
+
+# Run full authority, policy, and contract test suite (104 assertions)
+node tests/authority-tests.js
+```
+
+### Manual Interactive Test Scenarios
+
+You can verify all security flows directly in the UI using the **DEVELOPER / DEMO CONTROLS** panel:
+
+1. **Successful Flow (Lisinopril $12.40)**:
+   - Click **"Simulate: Full Successful Refill Flow"**.
+   - Agent stages Lisinopril, passes Gate 1 & Gate 2, triggers Gate 3 confirmation dialog.
+   - Click **"Authorize & Submit Refill"** &rarr; Order is executed, refills decremented, audit receipt rendered.
+2. **Out-of-Scope Flow (Atorvastatin $18.75)**:
+   - With contract set only to Lisinopril (`RX-001`), click **"Simulate: Out-of-Scope Rx Refill"**.
+   - Agent attempts to refill Atorvastatin (`RX-002`) &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_RX`). **No confirmation modal opens.**
+3. **Amount-Limit Exceeded Flow**:
+   - Click **"Simulate: Exceed Spend Limit ($31.15)"**.
+   - Total order exceeds contract maximum ($25.00) &rarr; Blocked at Gate 2 (`BLOCKED_SPEND_LIMIT`). **No confirmation modal opens.**
+4. **Prepare-Only Restriction Flow**:
+   - Set Action Scope to **"Prepare only"** and click **"Save Authority Contract"**.
+   - Attempt a submit action &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_ACTION`). **No confirmation modal opens.**
+5. **Suspicious Trap Flow**:
+   - Click **"Simulate: Suspicious Security Trap"**.
+   - Agent calls `update_payment_method` &rarr; Blocked at Gate 1 (`UNTRUSTED_INSTRUCTION_DESCRIPTION`). **No confirmation modal opens.**
+
+---
+
+## Local Development
+
+Handrail is built entirely with static HTML, CSS, and modern JavaScript modules. No complex build pipelines or bundlers are required.
+
+### Serving with any static HTTP server:
+
+```bash
+# Using Node npx serve:
+npx serve .
+
+# Or using Python 3:
+python3 -m http.server 8000
+
+# Or using standard npm scripts:
+npm run dev
+```
+
+Open `http://localhost:3000` (or the port indicated by your static server) in your browser.
+
+---
+
+## WebMCP Environment Testing
+
+Handrail natively integrates with the emerging **WebMCP** specification:
+
+1. **Native Detection**: On initialization, Handrail checks for `window.modelContext` or `document.modelContext`.
+2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers all tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas.
+3. **Browser Fallback & Simulation**: If running in a standard development browser where `document.modelContext` is not yet natively exposed, Handrail detects the environment, gracefully logs runtime status in the WebMCP Inspector, and routes tool calls through the exact same 4-gate execution pipeline via the embedded test harness.
+
+---
+
+## Static Deployment
+
+Handrail is 100% static client-side software requiring zero backend servers, serverless functions, or databases.
+
+### Deploying to Netlify
+A minimal `netlify.toml` is included in the project root:
+
+```toml
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+```
+
+To deploy:
+1. Connect your repository to **Netlify** (or drag-and-drop the directory).
+2. Set publish directory to `.` (the project root).
+3. No build command is necessary.
+
+Can also be deployed directly to **GitHub Pages**, **Vercel**, **Cloudflare Pages**, **AWS S3**, or **Google Cloud Storage**.
+
+---
+
+## Limitations
+
+- **Scope Boundary**: Handrail is an agent authority and consent layer for WebMCP-enabled applications; it is **not** a general-purpose remediation engine for third-party inaccessible websites.
+- **Trust Heuristic Scope**: The Gate 1 tool-trust check demonstrates heuristic defense against tool squatting, casing anomalies, and instruction-like prompt injections. It is **not** an exhaustive security classifier and does not claim to detect every sophisticated adversarial prompt injection.
+- **First-Party Integration**: The current implementation operates as a first-party, page-side consent layer embedded within the application context.
+- **Research & Demo Context**: Handrail demonstrates the architectural viability of deterministic authority contracts and accessible human-in-the-loop consent for AI agents.
+
+---
+
+## License
+
+Handrail is released under the **MIT License**. See [LICENSE](./LICENSE) for details.
