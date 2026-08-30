@@ -45,6 +45,7 @@ import {
   registerWebMCPTools,
   checkWebMCPNativeAvailability,
   executeHandrailTool,
+  callNativeTool,
   WEBMCP_PRIMARY_TOOL_DEFINITIONS,
   WEBMCP_TOOL_DEFINITIONS,
 } from './tools.js';
@@ -1445,3 +1446,9 @@ function bindTestRunner() {
     });
   }
 }
+
+window.handrail = {
+  callTool: callNativeTool,
+  getTools: () => (document.modelContext?.getTools ? document.modelContext.getTools() : Promise.resolve([])),
+  getAuditLogs: getAuditLogs,
+};
