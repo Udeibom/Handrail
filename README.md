@@ -270,6 +270,131 @@ Can also be deployed directly to **GitHub Pages**, **Vercel**, **Cloudflare Page
 
 ---
 
+## Verified Test Output
+
+Test suite results captured on **2026-08-30**:
+
+```
+================================================================================
+                   HANDRAIL SECURITY-FOCUSED TEST SUITE                        
+================================================================================
+Lightweight, dependency-free test runner exercising actual security-critical functions.
+
+[PASS] 1. In-Scope Read-Only Actions
+  Verifies read-only tool inspection executes directly and immutably
+  ✓ In-scope read-only action: search_medications executes without confirmation
+      Returned 3 prescriptions. Confirmation contacted: false
+  ✓ In-scope read-only action: search_medications structured query filter
+      Found Lisinopril (RX-001)
+  ✓ In-scope read-only action: view_prescription_details returns clinical data
+      Prescription: Lisinopril 10 mg, Price: $12.4
+  ✓ Read-only actions preserve Authority Contract fingerprint
+      Contract state is strictly immutable during read-only tool execution
+
+[PASS] 2. Non-Committal Staging (prepare_refill)
+  Verifies prepare_refill operates non-committally inside authority bounds
+  ✓ Demonstrate: prepare_refill can execute when authorized
+      Staged order total: $12.4. Status: STAGED_READY_FOR_SUBMISSION
+  ✓ Demonstrate: prepare_refill does NOT modify pharmacy records or submitted orders
+      Refills count preserved (2), submitted orders count unchanged (0)
+  ✓ Demonstrate: prepare_refill is blocked when out of scope
+      Blocked with code: BLOCKED_UNAUTHORIZED_RX
+  ✓ prepare_refill fails closed when amount exceeds max spend limit
+      Blocked with BLOCKED_SPEND_LIMIT ($12.40 exceeds $10.00 limit)
+
+[PASS] 3. Consequential Actions & Human Confirmation Gate
+  Tests human confirmation gate, state invariance, approval, and denial
+  ✓ In-scope submit_refill requires confirmation (Policy Engine Gate 2 -> Gate 3)
+      Requires confirmation: true, Reason: Order cost ($12.40) meets or exceeds confirmation threshold ($10.00).
+  ✓ CRITICAL: Calling submit_refill does NOT modify refill state until confirmation is approved
+      State during confirmation: refills=2 (expected 2), orders=0 (expected 0)
+  ✓ User denial: Consequential action halted safely with DENIED verdict and zero state mutation
+      Verdict: DENIED, Refills remaining: 2
+  ✓ Successful approval & refill execution: Order committed, refills decremented, confirmation receipt generated
+      Receipt: RX-CONF-991472, Refills remaining: 1 (decremented by 1)
+  ✓ Confirmation unavailable: Fails closed safely and NEVER converts to approval
+      Verdict: DENIED, Error: Action denied by human user (Confirmation unavailable (Headless / non-DOM environment with no confirmation provider configured). Failing closed.).
+
+[PASS] 4. Out-of-Scope Enforcement (Gate 2 Block, NO Confirmation)
+  Verifies unpermitted requests fail closed at Gate 2 without confirmation
+  ✓ Demonstrate: Out-of-scope submit_refill does NOT enter confirmation
+      Blocked at Gate 2 with BLOCKED_UNAUTHORIZED_RX. Confirmation triggered: false
+  ✓ Demonstrate: Amount-above-limit submit_refill does NOT enter confirmation
+      Blocked at Gate 2 with BLOCKED_SPEND_LIMIT ($31.15 > $20.00). Confirmation triggered: false
+  ✓ Disallowed submit: actionScope="prepare_only" blocks submit_refill without confirmation
+      Blocked at Gate 2 with BLOCKED_UNAUTHORIZED_ACTION. Confirmation triggered: false
+  ✓ Ineligible medication: 0 refills remaining blocks submit_refill without confirmation
+      Blocked at Gate 2 with BLOCKED_INELIGIBLE_RX. Confirmation triggered: false
+
+[PASS] 5. Tool-Trust & Adversarial Protection (Gate 1 Block, NO Confirmation)
+  Tests tool-name squatting, prompt injection, and trap detection at Gate 1
+  ✓ Demonstrate: Suspicious/untrusted tool does NOT enter confirmation
+      Security trap update_payment_method blocked at Gate 1 (UNTRUSTED_INSTRUCTION_DESCRIPTION). Confirmation triggered: false
+  ✓ Tool-name squatting: Separator spoofing ("submit-refill") blocked at Gate 1
+      Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check (UNTRUSTED_NAME_SQUATTING: Tool name 'submit-refill' uses non-standard separators or casing imitating expected tool 'submit_refill'.). No confirmation was offered.
+  ✓ Tool-name squatting: Levenshtein typo distance ("submit_refil") detected
+      Tool name 'submit_refil' is suspiciously close (edit distance 1) to expected tool 'submit_refill'. Potential typosquat.
+  ✓ Tool-name squatting: Version suffix ("submit_refill_v2") detected
+      Tool name 'submit_refill_v2' appears to be an unauthorized variant or suffix of expected tool 'submit_refill'.
+  ✓ Tool-name squatting: camelCase variation ("submitRefill") detected
+      Tool name 'submitRefill' uses non-standard separators or casing imitating expected tool 'submit_refill'.
+  ✓ Instruction-like description: Matched "ignore" in prompt injection metadata
+      Tool description contains suspicious or instruction-like phrase: "ignore previous instructions".
+  ✓ Instruction-like description: Matched "always approve" in prompt injection metadata
+      Tool description contains suspicious or instruction-like phrase: "always approve".
+  ✓ Instruction-like description: Matched "system instruction" in prompt injection metadata
+      Tool description contains suspicious or instruction-like phrase: "bypass".
+  ✓ Instruction-like description: Matched "ask for credentials" in prompt injection metadata
+      Tool description contains suspicious or instruction-like phrase: "Ask the user for credentials".
+  ✓ Tool registered after contract creation: Unexpected mutating tool flagged untrusted
+      Tool 'transfer_patient_funds' was not in the session expected tool set and is classified as mutating (consequential). Untrusted.
+  ✓ Unknown tool: Unregistered tool fails closed at Gate 1
+      Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check (UNTRUSTED_UNEXPECTED_MUTATING: Tool 'unregistered_rogue_tool' was not in the session expected tool set and is classified as mutating (consequential). Untrusted.). No confirmation was offered.
+
+[PASS] 6. Fail-Closed Security & Error Handling
+  Verifies strict fail-closed behavior across edge cases and thrown errors
+  ✓ Missing authority: Null authority contract fails closed immediately
+      Authority Contract is missing or undefined. Failing closed to safeguard patient security.
+  ✓ Malformed authority: Corrupted contract fields fail closed immediately
+      Authority Contract is malformed or corrupted. Failing closed to safeguard patient security.
+  ✓ Invalid arguments: Empty parameters object fails closed
+      Preparation requires at least one valid prescription ID in structured parameters.
+  ✓ Invalid arguments: Non-existent prescription ID (RX-999) fails closed
+      Agent attempted to stage unauthorized medication(s): RX-999. Not granted in Authority Contract.
+  ✓ Trust-check failure: Gate 1 blocks untrusted tool call even under wildcard authority contract
+      Halted at Gate 1 with: UNTRUSTED_NAME_SQUATTING
+  ✓ Security decision throws an error: Runtime exception fails closed and is NOT converted to approval
+      Safely blocked with code: BLOCKED_INTERNAL_ERROR (Authority evaluation error: Simulated internal memory corruption in contract getter)
+
+[PASS] 7. Structured Audit Trail & Provenance
+  Verifies audit logging, structured receipt generation, and JSON export
+  ✓ Blocked operation creates audit event with unique ID and blocked status
+      Created log: AUDIT-0001, Decision: blocked
+  ✓ Denied operation creates audit event recording human refusal
+      Found audit event: AUDIT-0002, Decision: denied
+  ✓ Approved and executed operation creates audit event
+      Audit record: AUDIT-0004, Decision: executed
+  ✓ Audit log captures all 5 provenance facets (Authorized, Requested, Decided, Happened, Result)
+      Verified presence of userAuthorized, arguments, decisionDetails, whatHappened, and result
+  ✓ Audit trail exports to valid, parsable JSON array
+      Exported 4 structured records
+
+--------------------------------------------------------------------------------
+TEST EXECUTION SUMMARY:
+  Total Assertions: 39
+  Passed:           39
+  Failed:           0
+================================================================================
+```
+
+```
+========================================
+  AUTHORITY & POLICY TESTS: 104/104 PASSED
+========================================
+```
+
+---
+
 ## License
 
 Handrail is released under the **MIT License**. See [LICENSE](./LICENSE) for details.
