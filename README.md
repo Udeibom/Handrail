@@ -267,6 +267,7 @@ Can also be deployed directly to **GitHub Pages**, **Vercel**, **Cloudflare Page
 - **Trust Heuristic Scope**: The Gate 1 tool-trust check demonstrates heuristic defense against tool squatting, casing anomalies, and instruction-like prompt injections. It is **not** an exhaustive security classifier and does not claim to detect every sophisticated adversarial prompt injection.
 - **First-Party Integration**: The current implementation operates as a first-party, page-side consent layer embedded within the application context.
 - **Research & Demo Context**: Handrail demonstrates the architectural viability of deterministic authority contracts and accessible human-in-the-loop consent for AI agents.
+- **Simulated Mid-Session Registration Demo**: The "Simulate Unexpected Mid-Session Registration" button in the demo UI exercises the detection logic through the internal test harness using an `isSimulatedUnexpected` flag, not a live WebMCP `document.modelContext` tool-registration event at runtime. In a production WebMCP environment, the browser would fire a native registration event that Handrail intercepts via the same `detectUnexpectedRegistration()` code path — the underlying security logic is identical, only the event source differs.
 
 ---
 
