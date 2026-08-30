@@ -395,6 +395,54 @@ TEST EXECUTION SUMMARY:
 
 ---
 
+## Security Proof Points
+
+The following critical security properties are verified by automated tests in `tests/security-suite.js`. Each test assertion is quoted verbatim from the source code.
+
+### State Invariance During Confirmation
+
+**Test:** `"CRITICAL: Calling submit_refill does NOT modify refill state until confirmation is approved"`
+
+**Why it matters:** An AI agent cannot exploit the confirmation delay to observe or modify pharmacy records — refill counts and submitted orders remain unchanged until the human explicitly approves.
+
+### Runtime Exception Fail-Closed
+
+**Test:** `"Security decision throws an error: Runtime exception fails closed and is NOT converted to approval"`
+
+**Why it matters:** If the policy engine encounters an internal error (e.g., memory corruption, malformed data), the system defaults to denial rather than granting unauthorized access.
+
+### Gate 1 Trust Check Under Wildcard Authority
+
+**Test:** `"Trust-check failure: Gate 1 blocks untrusted tool call even under wildcard authority contract"`
+
+**Why it matters:** Even if a user accidentally authorizes all medications and all actions (`*` wildcard), a typosquatted or suspicious tool name is still blocked at Gate 1 before any authority evaluation occurs.
+
+### Confirmation Unavailable Fail-Closed
+
+**Test:** `"Confirmation unavailable: Fails closed safely and NEVER converts to approval"`
+
+**Why it matters:** In headless environments or when the confirmation UI cannot render, the system treats the absence of confirmation as a denial rather than bypassing the gate.
+
+### Unauthorized Medication Blocked Without Confirmation
+
+**Test:** `"Demonstrate: Out-of-scope submit_refill does NOT enter confirmation"`
+
+**Why it matters:** Gate 2 blocks out-of-scope requests before they can prompt the user, preventing social-engineering attacks that rely on repetitive confirmation dialogs for unauthorized actions.
+
+### Untrusted Tool Blocked at Gate 1
+
+**Test:** `"Unknown tool: Unregistered tool fails closed at Gate 1"`
+
+**Why it matters:** Any tool not explicitly registered in the Handrail session is treated as untrusted and blocked immediately, preventing injection of rogue tools mid-session.
+
+### User Denial Preserves State
+
+**Test:** `"User denial: Consequential action halted safely with DENIED verdict and zero state mutation"`
+
+**Why it matters:** When a user denies a confirmation request, the system guarantees no pharmacy records, refill counts, or payment methods are modified.
+
+---
+
 ## License
 
 Handrail is released under the **MIT License**. See [LICENSE](./LICENSE) for details.
