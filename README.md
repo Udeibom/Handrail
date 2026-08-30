@@ -6,9 +6,11 @@
 
 ## Overview
 
-**Handrail** is an open-source, zero-dependency human-control layer for web-based autonomous AI agents. As AI agents gain the ability to interact directly with web applications via the **WebMCP** standard (`document.modelContext`), users—especially those who rely on screen readers and keyboard navigation—require transparent, reliable, and accessible safeguards against unintended, out-of-scope, or malicious tool invocations.
+**Handrail** is an open-source human-control layer for web-based autonomous AI agents. It has zero runtime dependencies — no React, no Angular, no frontend framework. The entire application is vanilla HTML, CSS, and JavaScript ES modules. Build tooling (Vite, TypeScript) is used only for development and production bundling.
 
-In this demonstration, Handrail is deployed on **RefillRx**, an accessible patient prescription portal. Users establish a structured **Authority Contract** specifying allowed medications, permitted action scopes, and maximum spending limits. Before any WebMCP tool executes, Handrail deterministically checks tool trust and evaluates authority boundaries, presenting an accessible confirmation dialog whenever a consequential action is requested.
+As AI agents gain the ability to interact directly with web applications via **WebMCP** (Web Model Context Protocol — a browser standard exposing `document.modelContext` for structured tool invocation), users—especially those who rely on screen readers and keyboard navigation—require transparent, reliable, and accessible safeguards against unintended, out-of-scope, or malicious tool invocations.
+
+In this demonstration, Handrail is deployed on **RefillRx**, a fictional accessible patient prescription portal (all data is synthetic). Users establish a structured **Authority Contract** specifying allowed medications, permitted action scopes, and maximum spending limits. Before any WebMCP tool executes, Handrail deterministically checks tool trust and evaluates authority boundaries, presenting an accessible confirmation dialog whenever a consequential action is requested.
 
 ---
 
@@ -25,9 +27,9 @@ Autonomous AI agents can execute multi-step workflows rapidly, invoking browser 
 
 ## The Solution
 
-The person that came to my mind when I set out to build this was my classmate Mike, who, although blind, challenged me with his always joyous mood.
+The person that came to my mind when I set out to build this was my classmate Mike, who, although blind, challenged me with his always joyous mood. Watching him navigate the web made me realize how much trust we place in agents acting on our behalf — and how little control users like him have when those agents move fast.
 
-Handrail introduces a 4-layer defense-in-depth model coupled with accessible confirmation and structured provenance receipts:
+Handrail is the control layer I wished existed for Mike. It introduces a 4-layer defense-in-depth model coupled with accessible confirmation and structured provenance receipts:
 
 ```
                       +------------------------------------------+
@@ -279,12 +281,12 @@ handrail/
 
 ## WebMCP Environment Testing
 
-Handrail natively integrates with the emerging **WebMCP** specification:
+Handrail natively integrates with the emerging **WebMCP** (Web Model Context Protocol) specification:
 
 1. **Native Detection**: On initialization, Handrail checks for `window.modelContext` or `document.modelContext`.
 2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers all tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas.
-3. **Runtime Tool-Change Events**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (or falls back to the `ontoolchange` property). Any tool registered after the session init that is not in the expected tool set is flagged as unexpected and untrusted.
-4. **Browser Fallback & Simulation**: If running in a standard development browser where `document.modelContext` is not yet natively exposed, Handrail detects the environment, gracefully logs runtime status in the WebMCP Inspector, and routes tool calls through the exact same 4-gate execution pipeline via the embedded test harness.
+3. **Runtime Tool-Change Events**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (or falls back to the `ontoolchange` property). Tools registered after session init that are not in the expected tool set are flagged as unexpected and untrusted.
+4. **Browser Fallback**: The live demo at handail.netlify.app runs in standard Chrome/Firefox/Safari, where `document.modelContext` is not yet exposed. Handrail detects this and routes all tool calls through the same 4-gate execution pipeline via an embedded test harness. The security logic is identical — only the event source differs. To test with native WebMCP, run Chrome with experimental flags enabled.
 
 ---
 
@@ -329,7 +331,9 @@ Can also be deployed directly to **GitHub Pages**, **Vercel**, **Cloudflare Page
 
 ## Verified Test Output
 
-Test suite results captured on **2026-08-30**:
+Test suite results captured on **2026-08-30**. To regenerate: `node tests/security-suite.js` and `node tests/authority-tests.js`.
+
+> **Note on reading the output**: Each test name is a security property being verified. Messages like "Confirmation contacted: false" mean the test confirmed that the human confirmation dialog was NOT invoked — this is the expected behavior for read-only or blocked actions.
 
 ```
 ================================================================================

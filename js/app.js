@@ -570,8 +570,12 @@ function renderAuthorityContractControls() {
 async function updateContractFingerprintDisplay() {
   const fingerprintEl = document.getElementById('contract-fingerprint');
   if (fingerprintEl) {
-    const fp = await calculateContractFingerprint(state.activeContract);
-    fingerprintEl.textContent = fp;
+    try {
+      const fp = await calculateContractFingerprint(state.activeContract);
+      fingerprintEl.textContent = fp;
+    } catch (err) {
+      fingerprintEl.textContent = 'Fingerprint unavailable';
+    }
   }
 }
 
