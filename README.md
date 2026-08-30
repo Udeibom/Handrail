@@ -25,6 +25,8 @@ Autonomous AI agents can execute multi-step workflows rapidly, invoking browser 
 
 ## The Solution
 
+The person that came to my mind when I set out to build this was my classmate Mike, who, although blind, challenged me with his always joyous mood.
+
 Handrail introduces a 4-layer defense-in-depth model coupled with accessible confirmation and structured provenance receipts:
 
 ```
