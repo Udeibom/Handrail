@@ -78,6 +78,8 @@ Handrail introduces a 4-layer defense-in-depth model coupled with accessible con
 ### Accessible Human Confirmation
 When an action is authorized and consequential, Handrail halts execution and opens a modal `<dialog role="alertdialog">` with strict keyboard focus trapping, high-contrast labels, non-color visual badges, and screen-reader announcements.
 
+**Response Time Tracking**: The confirmation dialog includes a small stopwatch that starts when the dialog opens and stops when the user approves or denies. The elapsed time (in seconds) is included in the confirmation result as `responseTimeSeconds`, enabling measurement of human response times for usability research. The stopwatch is `aria-hidden` so it does not interfere with screen reader announcements.
+
 ### Structured Audit Receipt
 Every decision generates an immutable audit record capturing 5 distinct provenance facets:
 1. **User Authorized**: Exact contract snapshot at execution time.
@@ -203,7 +205,20 @@ You can verify all security flows directly in the UI using the **DEVELOPER / DEM
 
 ## Local Development
 
-Handrail is built entirely with static HTML, CSS, and modern JavaScript modules. No complex build pipelines or bundlers are required.
+Handrail is built with static HTML, CSS, and modern JavaScript modules. Vite is used as a dev server and bundler for production builds.
+
+### Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server (http://localhost:3000)
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ### Serving with any static HTTP server:
 
@@ -214,11 +229,49 @@ npx serve .
 # Or using Python 3:
 python3 -m http.server 8000
 
-# Or using standard npm scripts:
-npm run dev
+# Or using Vite preview:
+npm run preview
 ```
 
 Open `http://localhost:3000` (or the port indicated by your static server) in your browser.
+
+### Console Testing (Browser DevTools)
+
+When running in a browser, Handrail exposes a `window.handrail` API for testing:
+
+```javascript
+// List registered WebMCP tools (returns Promise)
+await window.handrail.getTools();
+
+// Execute a tool through the 4-gate pipeline
+await window.handrail.callTool('search_medications', {});
+await window.handrail.callTool('prepare_refill', { prescriptionIds: ['RX-001'] });
+await window.handrail.callTool('submit_refill', { prescriptionIds: ['RX-002'] });
+
+// View current audit log entries
+window.handrail.getAuditLogs();
+```
+
+### Project Structure
+
+```
+handrail/
+├── index.html              # Main application entry
+├── styles.css              # Accessible design system (WCAG AA/AAA)
+├── netlify.toml            # Static deployment config
+├── js/
+│   ├── app.js              # UI controller, rendering, event binding
+│   ├── authority.js        # Authority Contract creation & evaluation (Gate 2)
+│   ├── audit.js            # Structured audit logging & receipt rendering
+│   ├── confirmation.js     # Accessible confirmation dialog (Gate 3)
+│   ├── pharmacy-data.js    # Mock pharmacy data & business logic
+│   ├── tools.js            # WebMCP tool registry & execution pipeline
+│   └── trust.js            # Tool-trust heuristics (Gate 1)
+├── tests/
+│   ├── security-suite.js   # 39 security & fail-closed assertions
+│   └── authority-tests.js  # 104 authority & policy assertions
+└── src/                    # Vite/React scaffold (not used by app)
+```
 
 ---
 
@@ -228,7 +281,8 @@ Handrail natively integrates with the emerging **WebMCP** specification:
 
 1. **Native Detection**: On initialization, Handrail checks for `window.modelContext` or `document.modelContext`.
 2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers all tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas.
-3. **Browser Fallback & Simulation**: If running in a standard development browser where `document.modelContext` is not yet natively exposed, Handrail detects the environment, gracefully logs runtime status in the WebMCP Inspector, and routes tool calls through the exact same 4-gate execution pipeline via the embedded test harness.
+3. **Runtime Tool-Change Events**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (or falls back to the `ontoolchange` property). Any tool registered after the session init that is not in the expected tool set is flagged as unexpected and untrusted.
+4. **Browser Fallback & Simulation**: If running in a standard development browser where `document.modelContext` is not yet natively exposed, Handrail detects the environment, gracefully logs runtime status in the WebMCP Inspector, and routes tool calls through the exact same 4-gate execution pipeline via the embedded test harness.
 
 ---
 
