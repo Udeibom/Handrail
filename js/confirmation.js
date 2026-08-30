@@ -387,21 +387,21 @@ function handleDecision(confirmed, note) {
   }
 
   if (announcer) {
-    announcer.textContent = '';
     announcer.setAttribute('aria-live', 'assertive');
+    announcer.textContent = '';
     const message = confirmed
       ? 'Refill approved. The agent is submitting the refill order.'
       : 'Refill denied. No order was submitted and no pharmacy records were changed.';
     setTimeout(() => {
       announcer.textContent = message;
-    }, 50);
+    }, 100);
   }
 
   setTimeout(() => {
     if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
       previousActiveElement.focus();
     }
-  }, 150);
+  }, 300);
 
   if (activeResolve) {
     const res = activeResolve;
@@ -418,6 +418,6 @@ function handleDecision(confirmed, note) {
     if (announcer) {
       announcer.setAttribute('aria-live', 'polite');
     }
-  }, 2000);
+  }, 3000);
 }
 

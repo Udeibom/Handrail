@@ -71,10 +71,13 @@ function announce(message) {
   const announcer = document.getElementById('accessibility-announcer');
   if (announcer) {
     announcer.textContent = '';
-    // slight timeout to guarantee screen-reader detection
+    announcer.setAttribute('aria-live', 'assertive');
     setTimeout(() => {
       announcer.textContent = message;
     }, 50);
+    setTimeout(() => {
+      announcer.setAttribute('aria-live', 'polite');
+    }, 2000);
   }
 }
 

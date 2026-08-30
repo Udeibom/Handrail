@@ -157,6 +157,18 @@ export function logAuditEvent(eventData) {
   updateAuditLogUI();
   renderReceiptUI(entry);
 
+  if (typeof document !== 'undefined') {
+    const announcer = document.getElementById('accessibility-announcer');
+    if (announcer) {
+      const decisionText = entry.decision === 'executed' ? 'executed' : entry.decision === 'blocked' ? 'blocked' : entry.decision;
+      const summary = `Action ${decisionText}. ${entry.reason || ''}`;
+      announcer.setAttribute('aria-live', 'assertive');
+      announcer.textContent = '';
+      setTimeout(() => { announcer.textContent = summary; }, 50);
+      setTimeout(() => { announcer.setAttribute('aria-live', 'polite'); }, 2000);
+    }
+  }
+
   return entry;
 }
 
