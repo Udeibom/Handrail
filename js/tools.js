@@ -999,8 +999,6 @@ export function checkWebMCPNativeAvailability() {
   };
 }
 
-const nativeRegisteredTools = new Map();
-
 /**
  * Registers tools with real native WebMCP (document.modelContext.registerTool) when available.
  * Does NOT fake WebMCP or invent a simulator in place of the real API.
@@ -1015,12 +1013,10 @@ export function registerWebMCPTools(getActiveContract) {
   const registeredTools = [];
   const toolsToRegister = WEBMCP_PRIMARY_TOOL_DEFINITIONS;
 
-  nativeRegisteredTools.clear();
-
   if (availability.isAvailable) {
     for (const toolDef of toolsToRegister) {
       try {
-        const nativeTool = document.modelContext.registerTool({
+        document.modelContext.registerTool({
           name: toolDef.name,
           description: toolDef.description,
           inputSchema: toolDef.inputSchema,
@@ -1031,9 +1027,6 @@ export function registerWebMCPTools(getActiveContract) {
             return executeHandrailTool(toolDef.name, params, activeContract);
           },
         });
-        if (nativeTool) {
-          nativeRegisteredTools.set(toolDef.name, nativeTool);
-        }
         registeredCount++;
         registeredTools.push(toolDef.name);
       } catch (err) {
@@ -1050,28 +1043,8 @@ export function registerWebMCPTools(getActiveContract) {
   };
 }
 
-export async function callNativeTool(name, params) {
-  if (!document.modelContext || typeof document.modelContext.executeTool !== 'function') {
-    return executeHandrailTool(name, params, null);
-  }
-
-  let nativeTool = nativeRegisteredTools.get(name);
-
-  if (!nativeTool && typeof document.modelContext.getTools === 'function') {
-    const tools = await document.modelContext.getTools();
-    for (const t of tools) {
-      if (t && t.name === name) {
-        nativeTool = t;
-        break;
-      }
-    }
-  }
-
-  if (!nativeTool) {
-    return executeHandrailTool(name, params, null);
-  }
-
-  return document.modelContext.executeTool(nativeTool, params);
+export async function callNativeTool(name, params, activeContract) {
+  return executeHandrailTool(name, params, activeContract);
 }
 
 /**

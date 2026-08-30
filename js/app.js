@@ -1448,7 +1448,7 @@ function bindTestRunner() {
 }
 
 window.handrail = {
-  callTool: callNativeTool,
+  callTool: (name, params) => callNativeTool(name, params, state.activeContract),
   getTools: () => (document.modelContext?.getTools ? document.modelContext.getTools() : Promise.resolve([])),
   getAuditLogs: getAuditLogs,
 };
