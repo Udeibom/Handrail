@@ -24,6 +24,9 @@
 let activeResolve = null;
 let previousActiveElement = null;
 let customConfirmationProvider = null;
+let stopwatchStartTime = null;
+let stopwatchInterval = null;
+let stopwatchElement = null;
 
 /**
  * Sets a custom confirmation provider function for test environments or headless execution.
@@ -47,6 +50,19 @@ export function initConfirmationSystem() {
   if (typeof document === 'undefined') return;
 
   const dialog = document.getElementById('handrail-confirmation-dialog');
+
+  // Create unobtrusive stopwatch element (aria-hidden: visual only, no screen reader interference)
+  if (dialog && !document.getElementById('dialog-stopwatch')) {
+    stopwatchElement = document.createElement('span');
+    stopwatchElement.id = 'dialog-stopwatch';
+    stopwatchElement.setAttribute('aria-hidden', 'true');
+    stopwatchElement.style.cssText = 'display:inline-block;margin-left:8px;font-family:monospace;font-size:0.75rem;color:var(--color-text-muted, #64748b);vertical-align:middle;';
+    const titleEl = document.getElementById('dialog-title');
+    if (titleEl && titleEl.parentNode) {
+      titleEl.parentNode.insertBefore(stopwatchElement, titleEl.nextSibling);
+    }
+  }
+
   const cancelBtn = document.getElementById('dialog-deny-btn');
   const confirmBtn = document.getElementById('dialog-authorize-btn');
 
@@ -313,6 +329,18 @@ ${rawArgumentsFormatted}</pre>
       announcer.textContent = `Alert: Human confirmation required for ${toolName}. Action: Refill order for ${medNamesText} costing ${formattedCost}. Approving places the order; denying halts the agent. Press Tab to review or activate Approve or Deny buttons.`;
     }
 
+    // Start confirmation response timer
+    stopwatchStartTime = Date.now();
+    if (stopwatchElement) {
+      stopwatchElement.textContent = '⏱ 0.0s';
+      stopwatchInterval = setInterval(() => {
+        if (stopwatchElement && stopwatchStartTime) {
+          const elapsed = ((Date.now() - stopwatchStartTime) / 1000).toFixed(1);
+          stopwatchElement.textContent = `⏱ ${elapsed}s`;
+        }
+      }, 100);
+    }
+
     if (typeof dialog.showModal === 'function') {
       dialog.showModal();
     } else {
@@ -335,6 +363,20 @@ ${rawArgumentsFormatted}</pre>
 function handleDecision(confirmed, note) {
   const dialog = document.getElementById('handrail-confirmation-dialog');
   const announcer = document.getElementById('accessibility-announcer');
+
+  // Stop the timer and capture elapsed time
+  let elapsedSeconds = null;
+  if (stopwatchStartTime) {
+    elapsedSeconds = ((Date.now() - stopwatchStartTime) / 1000).toFixed(1);
+    stopwatchStartTime = null;
+  }
+  if (stopwatchInterval) {
+    clearInterval(stopwatchInterval);
+    stopwatchInterval = null;
+  }
+  if (stopwatchElement) {
+    stopwatchElement.textContent = elapsedSeconds !== null ? `⏱ ${elapsedSeconds}s` : '';
+  }
 
   if (dialog) {
     if (typeof dialog.close === 'function') {
@@ -361,6 +403,7 @@ function handleDecision(confirmed, note) {
       confirmed,
       reason: note,
       timestamp: new Date().toISOString(),
+      responseTimeSeconds: elapsedSeconds,
     });
   }
 }
