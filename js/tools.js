@@ -999,6 +999,9 @@ export function checkWebMCPNativeAvailability() {
   };
 }
 
+let isRegisteringExpectedTools = false;
+let unexpectedRegistrationHandler = null;
+
 /**
  * Registers tools with real native WebMCP (document.modelContext.registerTool) when available.
  * Does NOT fake WebMCP or invent a simulator in place of the real API.
@@ -1014,6 +1017,8 @@ export function registerWebMCPTools(getActiveContract) {
   const toolsToRegister = WEBMCP_PRIMARY_TOOL_DEFINITIONS;
 
   if (availability.isAvailable) {
+    isRegisteringExpectedTools = true;
+
     for (const toolDef of toolsToRegister) {
       try {
         document.modelContext.registerTool({
@@ -1033,6 +1038,12 @@ export function registerWebMCPTools(getActiveContract) {
         console.error(`Failed to register WebMCP tool ${toolDef.name} on document.modelContext:`, err);
       }
     }
+
+    isRegisteringExpectedTools = false;
+
+    if (document.modelContext && typeof document.modelContext === 'object') {
+      setupUnexpectedRegistrationListener();
+    }
   }
 
   return {
@@ -1041,6 +1052,62 @@ export function registerWebMCPTools(getActiveContract) {
     registeredTools,
     availability,
   };
+}
+
+export function setupUnexpectedRegistrationListener() {
+  if (unexpectedRegistrationHandler !== null) {
+    return;
+  }
+
+  const handler = (event) => {
+    if (isRegisteringExpectedTools) {
+      return;
+    }
+
+    const tool = event?.tool || event?.detail?.tool || event;
+    if (!tool || !tool.name) {
+      return;
+    }
+
+    const expectedNames = getExpectedTools();
+    if (expectedNames.includes(tool.name)) {
+      return;
+    }
+
+    const check = detectUnexpectedRegistration(tool, expectedNames);
+
+    if (check.isUnexpected) {
+      toolRegistry.registerTool({
+        name: tool.name,
+        description: tool.description || 'Unexpected runtime registration',
+        parameters: tool.inputSchema || tool.parameters || { type: 'object', properties: {} },
+        readOnlyHint: tool.readOnlyHint === true,
+        registrationInfo: {
+          registeredBy: 'Runtime-WebMCP-Event',
+          sessionId: getActiveSessionId(),
+          registeredAt: new Date().toISOString(),
+          source: 'ontoolchange',
+        },
+      });
+
+      if (typeof document !== 'undefined') {
+        const announcer = document.getElementById('accessibility-announcer');
+        if (announcer) {
+          announcer.setAttribute('aria-live', 'assertive');
+          announcer.textContent = `Security alert: Unexpected tool '${tool.name}' detected and blocked.`;
+          setTimeout(() => announcer.setAttribute('aria-live', 'polite'), 3000);
+        }
+      }
+    }
+  };
+
+  if (typeof document.modelContext.addEventListener === 'function') {
+    document.modelContext.addEventListener('toolchange', handler);
+  } else if ('ontoolchange' in document.modelContext) {
+    document.modelContext.ontoolchange = handler;
+  }
+
+  unexpectedRegistrationHandler = handler;
 }
 
 export async function callNativeTool(name, params, activeContract) {
