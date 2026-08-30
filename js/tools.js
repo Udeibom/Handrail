@@ -1622,7 +1622,7 @@ export async function executeHandrailTool(toolName, params, contract) {
         toolName,
         action: 'update_payment_method',
         decision: 'blocked',
-        reason: 'Payment method changes are restricted security traps. Handrail prevents agent execution.',
+         reason: 'Payment method changes are restricted delegation traps. Handrail defaults to safe.',
         arguments: safeParams,
         userAuthorized: activeContractSnapshot,
         decisionDetails: { code: 'BLOCKED_SECURITY_TRAP' },

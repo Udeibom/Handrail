@@ -61,6 +61,16 @@ export function initConfirmationSystem() {
     if (titleEl && titleEl.parentNode) {
       titleEl.parentNode.insertBefore(stopwatchElement, titleEl.nextSibling);
     }
+
+    // Placeholder for real baseline comparison (to be supplied after user testing)
+    const comparisonPlaceholder = document.createElement('span');
+    comparisonPlaceholder.id = 'dialog-comparison-placeholder';
+    comparisonPlaceholder.setAttribute('aria-hidden', 'true');
+    comparisonPlaceholder.style.cssText = 'display:inline-block;margin-left:8px;font-family:monospace;font-size:0.75rem;color:var(--color-text-muted, #64748b);vertical-align:middle;';
+    comparisonPlaceholder.textContent = ' [REAL_COMPARISON]';
+    if (stopwatchElement && stopwatchElement.parentNode) {
+      stopwatchElement.parentNode.insertBefore(comparisonPlaceholder, stopwatchElement.nextSibling);
+    }
   }
 
   const cancelBtn = document.getElementById('dialog-deny-btn');

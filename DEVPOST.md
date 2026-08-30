@@ -2,7 +2,7 @@
 
 ## What it does
 
-Handrail is an accessibility-first consent layer for AI agents that invoke WebMCP tools on behalf of users. It sits between an AI agent and a web application, enforcing a deterministic 4-gate security pipeline before any consequential action executes: Tool-Trust check (Gate 1), Authority check (Gate 2), Human Confirmation (Gate 3), and Execution (Gate 4). Every decision generates a structured 5-facet audit receipt.
+Handrail is an accessibility-first consent layer for AI agents that invoke WebMCP tools on behalf of users. It sits between an AI agent and a web application, enforcing a deterministic 4-gate consent pipeline before any consequential action executes: Tool-Trust check (Gate 1), Authority check (Gate 2), Human Confirmation (Gate 3), and Execution (Gate 4). Every decision generates a structured 5-facet audit receipt.
 
 ## Why this use case is a strong fit for WebMCP specifically
 
@@ -13,7 +13,7 @@ Handrail fills exactly this gap. It uses WebMCP's `registerTool()` API to regist
 ## How it creates a better experience for people and agents together
 
 **For people (especially screen-reader and keyboard-only users):**
-- Confirmation dialogs use native `<dialog role="alertdialog">` with strict focus trapping, `aria-live` announcements, and fail-closed Escape handling
+- Confirmation dialogs use native `<dialog role="alertdialog">` with strict focus trapping, `aria-live` announcements, and defaults-to-safe Escape handling
 - Status indicators combine text tags, structural badges, and symbols — never color alone
 - Response time is measured and displayed: real user testing showed confirmation decisions made in under 2 seconds on average, with zero state mutation during the confirmation window
 - All interactive elements are keyboard-reachable with visible focus rings
@@ -39,14 +39,14 @@ Handrail integrates with WebMCP through three mechanisms:
 
 1. **Tool Registration**: On initialization, Handrail checks for `document.modelContext`. If available, it registers all 5 tools via `registerTool()` with canonical JSON input schemas and `readOnlyHint` classifications.
 
-2. **Runtime Event Handling**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (falling back to the `ontoolchange` property). Tools registered after session init that are not in the expected set are flagged as unexpected and untrusted. The demo's "Simulate Unexpected Mid-Session Registration" button uses the native `registerTool()` API when WebMCP is present, triggering a real event that Handrail intercepts.
+2. **Runtime Event Handling**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (falling back to the `ontoolchange` property). Tools registered after session init that are not in the expected set are flagged as unexpected and untrusted. The demo's "Test Unexpected Mid-Session Registration" button uses the native `registerTool()` API when WebMCP is present, triggering a real event that Handrail intercepts.
 
 3. **Execution Pipeline**: All tool calls — whether from the UI buttons, the console testing API (`window.handrail.callTool()`), or native WebMCP invocations — route through the same `executeHandrailTool()` function, which enforces the 4-gate pipeline.
 
-**Honest note on simulation**: In browsers without native WebMCP (current standard Chrome/Firefox/Safari), the demo falls back to an internal test harness. The "Simulate Unexpected Mid-Session Registration" scenario registers a tool directly to Handrail's internal `toolRegistry` with an `isSimulatedUnexpected` flag rather than firing a live browser event. The underlying `detectUnexpectedRegistration()` security logic is identical in both cases — only the event source differs. In a production WebMCP environment, the browser fires a native registration event that Handrail intercepts via the same code path.
+**Honest note on the test harness**: In browsers without native WebMCP (current standard Chrome/Firefox/Safari), the demo falls back to an internal test harness. The "Test Unexpected Mid-Session Registration" scenario registers a tool directly to Handrail's internal `toolRegistry` with an `isSimulatedUnexpected` flag rather than firing a live browser event. The underlying `detectUnexpectedRegistration()` security logic is identical in both cases — only the event source differs. In a production WebMCP environment, the browser fires a native registration event that Handrail intercepts via the same code path.
 
 ## Test Results
 
 - Security suite: 39/39 assertions passed
 - Authority & policy suite: 104/104 assertions passed
-- Critical tests verify: state invariance during confirmation, runtime exception fail-closed behavior, Gate 1 blocking under wildcard authority, and zero state mutation on user denial
+- Critical tests verify: state invariance during confirmation, runtime exception defaults-to-safe behavior, Gate 1 blocking under wildcard authority, and zero state mutation on user denial

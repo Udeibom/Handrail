@@ -100,7 +100,7 @@ Every decision generates an immutable audit record capturing 5 distinct provenan
 Execution follows a strict linear pipeline:
 $$\text{Trust Check (Gate 1)} \longrightarrow \text{Authority Check (Gate 2)} \longrightarrow \text{Human Confirmation (Gate 3)} \longrightarrow \text{Execution (Gate 4)}$$
 
-> **Fail-Closed Principle**: Gate 1 runs before Gate 2 and Gate 3. A suspicious, squatted, or untrusted tool fails closed immediately and **NEVER reaches the human confirmation dialog**.
+> **Defaults-to-Safe Principle**: Gate 1 runs before Gate 2 and Gate 3. A suspicious, squatted, or untrusted tool defaults to safe immediately and **NEVER reaches the human confirmation dialog**.
 
 ### Policy Decision Matrix
 
@@ -117,13 +117,13 @@ $$\text{Trust Check (Gate 1)} \longrightarrow \text{Authority Check (Gate 2)} \l
 
 ### Critical Security Rule:
 > **Confirmation does not grant authority.**  
-> Human confirmation only verifies a consequential action that is **already strictly within the Authority Contract**. If an agent attempts an unauthorized action, Handrail blocks it at Gate 2 without prompting the user.
+> Human confirmation only verifies a consequential action that is **already strictly within the Authority Contract**. If an agent attempts an unauthorized action, Handrail defaults to safe at Gate 2 without prompting the user.
 
 ---
 
 ## WebMCP Tools
 
-Handrail registers and regulates five primary WebMCP tools:
+Handrail registers **five primary WebMCP tools** via `document.modelContext.registerTool()`. The tool registry also maintains five internal aliases that normalize to primary names — these are not registered natively and exist only for name-resolution safety.
 
 ### 1. `search_medications`
 - **Purpose**: Search the patient's active medication catalog by name or condition.
@@ -163,9 +163,9 @@ RefillRx and Handrail are engineered from the ground up for full accessibility c
   - Implemented using native `<dialog role="alertdialog">` with `aria-modal="true"`.
   - Accessible name (`aria-labelledby="dialog-title"`) and description (`aria-describedby="dialog-description"`).
   - Strict **focus trapping** keeping Tab focus inside the active dialog.
-  - Closes safely on `Escape` key, defaulting to a fail-closed denial.
+  - Closes safely on `Escape` key, defaulting to a denial that keeps you safe.
   - Automatically restores focus to the invoking element upon closure.
-- **Live-Region Announcements**: `aria-live="polite"` and `aria-live="assertive"` regions announce status changes, agent execution results, and policy blocks to screen readers in real time.
+ - **Live-Region Announcements**: `aria-live="polite"` and `aria-live="assertive"` regions announce status changes, agent execution results, and policy decisions to screen readers in real time.
 - **No Color-Only State Indicators**: Statuses (`ALLOWED`, `BLOCKED`, `DENIED`, `CONFIRMED`, `EXECUTED`) always combine text tags, structural badges, and unicode symbols so information is never conveyed by color alone.
 - **Reduced Motion**: Respects `prefers-reduced-motion: reduce` by disabling non-essential transitions and animations.
 
@@ -177,7 +177,7 @@ RefillRx and Handrail are engineered from the ground up for full accessibility c
 Handrail includes comprehensive, dependency-free automated test suites running directly on Node.js or in the browser:
 
 ```bash
-# Run 4-gate security and fail-closed test suite (39 assertions)
+# Run 4-gate consent and defaults-to-safe test suite (39 assertions)
 node tests/security-suite.js
 
 # Run full authority, policy, and contract test suite (104 assertions)
@@ -189,21 +189,21 @@ node tests/authority-tests.js
 You can verify all security flows directly in the UI using the **DEVELOPER / DEMO CONTROLS** panel:
 
 1. **Successful Flow (Lisinopril $12.40)**:
-   - Click **"Simulate: Full Successful Refill Flow"**.
-   - Agent stages Lisinopril, passes Gate 1 & Gate 2, triggers Gate 3 confirmation dialog.
-   - Click **"Authorize & Submit Refill"** &rarr; Order is executed, refills decremented, audit receipt rendered.
+    - Click **"Run Successful Agent Flow"**.
+    - Agent stages Lisinopril, passes Gate 1 & Gate 2, triggers Gate 3 confirmation dialog.
+    - Click **"Authorize & Submit Refill"** &rarr; Order is executed, refills decremented, audit receipt rendered.
 2. **Out-of-Scope Flow (Atorvastatin $18.75)**:
-   - With contract set only to Lisinopril (`RX-001`), click **"Simulate: Out-of-Scope Rx Refill"**.
-   - Agent attempts to refill Atorvastatin (`RX-002`) &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_RX`). **No confirmation modal opens.**
+    - With contract set only to Lisinopril (`RX-001`), click **"Test: Out-of-Scope Medication"**.
+    - Agent attempts to refill Atorvastatin (`RX-002`) &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_RX`). **No confirmation modal opens.**
 3. **Amount-Limit Exceeded Flow**:
-   - Click **"Simulate: Exceed Spend Limit ($31.15)"**.
-   - Total order exceeds contract maximum ($25.00) &rarr; Blocked at Gate 2 (`BLOCKED_SPEND_LIMIT`). **No confirmation modal opens.**
+    - Click **"Test: Amount Limit Failure"**.
+    - Total order exceeds contract maximum ($25.00) &rarr; Blocked at Gate 2 (`BLOCKED_SPEND_LIMIT`). **No confirmation modal opens.**
 4. **Prepare-Only Restriction Flow**:
-   - Set Action Scope to **"Prepare only"** and click **"Save Authority Contract"**.
-   - Attempt a submit action &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_ACTION`). **No confirmation modal opens.**
-5. **Suspicious Trap Flow**:
-   - Click **"Simulate: Suspicious Security Trap"**.
-   - Agent calls `update_payment_method` &rarr; Blocked at Gate 1 (`UNTRUSTED_INSTRUCTION_DESCRIPTION`). **No confirmation modal opens.**
+    - Set Action Scope to **"Prepare only"** and click **"Save Authority Contract"**.
+    - Attempt a submit action &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_ACTION`). **No confirmation modal opens.**
+5. **Delegation Trap Flow**:
+    - Click **"Test: Suspicious Delegation Trap"**.
+    - Agent calls `update_payment_method` &rarr; Blocked at Gate 1 (`UNTRUSTED_INSTRUCTION_DESCRIPTION`). **No confirmation modal opens.**
 
 ---
 
@@ -272,9 +272,8 @@ handrail/
 │   ├── tools.js            # WebMCP tool registry & execution pipeline
 │   └── trust.js            # Tool-trust heuristics (Gate 1)
 ├── tests/
-│   ├── security-suite.js   # 39 security & fail-closed assertions
+│   ├── security-suite.js   # 39 assertions: trust, authority, consent, defaults-to-safe
 │   └── authority-tests.js  # 104 authority & policy assertions
-└── src/                    # Vite/React scaffold (not used by app)
 ```
 
 ---
@@ -284,7 +283,7 @@ handrail/
 Handrail natively integrates with the emerging **WebMCP** (Web Model Context Protocol) specification:
 
 1. **Native Detection**: On initialization, Handrail checks for `window.modelContext` or `document.modelContext`.
-2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers all tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas.
+2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers the 5 primary tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas. (Internal aliases are not registered natively.)
 3. **Runtime Tool-Change Events**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (or falls back to the `ontoolchange` property). Tools registered after session init that are not in the expected tool set are flagged as unexpected and untrusted.
 4. **Browser Fallback**: The live demo at handail.netlify.app runs in standard Chrome/Firefox/Safari, where `document.modelContext` is not yet exposed. Handrail detects this and routes all tool calls through the same 4-gate execution pipeline via an embedded test harness. The security logic is identical — only the event source differs. To test with native WebMCP, run Chrome with experimental flags enabled.
 
@@ -325,7 +324,7 @@ Can also be deployed directly to **GitHub Pages**, **Vercel**, **Cloudflare Page
 - **Trust Heuristic Scope**: The Gate 1 tool-trust check demonstrates heuristic defense against tool squatting, casing anomalies, and instruction-like prompt injections. It is **not** an exhaustive security classifier and does not claim to detect every sophisticated adversarial prompt injection.
 - **First-Party Integration**: The current implementation operates as a first-party, page-side consent layer embedded within the application context.
 - **Research & Demo Context**: Handrail demonstrates the architectural viability of deterministic authority contracts and accessible human-in-the-loop consent for AI agents.
-- **Simulated Mid-Session Registration Demo**: When native WebMCP (`document.modelContext`) is available, the "Simulate Unexpected Mid-Session Registration" button registers a tool via the real `registerTool()` API, which fires a `toolchange` event that Handrail intercepts — the same `detectUnexpectedRegistration()` code path handles both simulated and live events. In browsers without WebMCP, the demo falls back to the internal test harness using an `isSimulatedUnexpected` flag. The underlying security logic is identical in both cases; only the event source differs.
+- **Mid-Session Registration (Test Harness)**: When native WebMCP (`document.modelContext`) is available, the "Test Unexpected Mid-Session Registration" button registers a tool via the real `registerTool()` API, which fires a `toolchange` event that Handrail intercepts — the same `detectUnexpectedRegistration()` code path handles both test harness and live events. In browsers without WebMCP, the demo falls back to the internal test harness using an `isSimulatedUnexpected` flag. The underlying security logic is identical in both cases; only the event source differs.
 
 ---
 
@@ -337,108 +336,108 @@ Test suite results captured on **2026-08-30**. To regenerate: `node tests/securi
 
 ```
 ================================================================================
-                   HANDRAIL SECURITY-FOCUSED TEST SUITE                        
+                    HANDRAIL SECURITY-FOCUSED TEST SUITE                        
 ================================================================================
 Lightweight, dependency-free test runner exercising actual security-critical functions.
 
 [PASS] 1. In-Scope Read-Only Actions
   Verifies read-only tool inspection executes directly and immutably
   ✓ In-scope read-only action: search_medications executes without confirmation
-      Returned 3 prescriptions. Confirmation contacted: false
+       Returned 3 prescriptions. Confirmation contacted: false
   ✓ In-scope read-only action: search_medications structured query filter
-      Found Lisinopril (RX-001)
+       Found Lisinopril (RX-001)
   ✓ In-scope read-only action: view_prescription_details returns clinical data
-      Prescription: Lisinopril 10 mg, Price: $12.4
+       Prescription: Lisinopril 10 mg, Price: $12.4
   ✓ Read-only actions preserve Authority Contract fingerprint
-      Contract state is strictly immutable during read-only tool execution
+       Contract state is strictly immutable during read-only tool execution
 
 [PASS] 2. Non-Committal Staging (prepare_refill)
   Verifies prepare_refill operates non-committally inside authority bounds
   ✓ Demonstrate: prepare_refill can execute when authorized
-      Staged order total: $12.4. Status: STAGED_READY_FOR_SUBMISSION
+       Staged order total: $12.4. Status: STAGED_READY_FOR_SUBMISSION
   ✓ Demonstrate: prepare_refill does NOT modify pharmacy records or submitted orders
-      Refills count preserved (2), submitted orders count unchanged (0)
+       Refills count preserved (2), submitted orders count unchanged (0)
   ✓ Demonstrate: prepare_refill is blocked when out of scope
-      Blocked with code: BLOCKED_UNAUTHORIZED_RX
+       Blocked with code: BLOCKED_UNAUTHORIZED_RX
   ✓ prepare_refill fails closed when amount exceeds max spend limit
-      Blocked with BLOCKED_SPEND_LIMIT ($12.40 exceeds $10.00 limit)
+       Blocked with BLOCKED_SPEND_LIMIT ($12.40 exceeds $10.00 limit)
 
 [PASS] 3. Consequential Actions & Human Confirmation Gate
   Tests human confirmation gate, state invariance, approval, and denial
   ✓ In-scope submit_refill requires confirmation (Policy Engine Gate 2 -> Gate 3)
-      Requires confirmation: true, Reason: Order cost ($12.40) meets or exceeds confirmation threshold ($10.00).
+       Requires confirmation: true, Reason: Order cost ($12.40) meets or exceeds confirmation threshold ($10.00).
   ✓ CRITICAL: Calling submit_refill does NOT modify refill state until confirmation is approved
-      State during confirmation: refills=2 (expected 2), orders=0 (expected 0)
+       State during confirmation: refills=2 (expected 2), orders=0 (expected 0)
   ✓ User denial: Consequential action halted safely with DENIED verdict and zero state mutation
-      Verdict: DENIED, Refills remaining: 2
+       Verdict: DENIED, Refills remaining: 2
   ✓ Successful approval & refill execution: Order committed, refills decremented, confirmation receipt generated
-      Receipt: RX-CONF-991472, Refills remaining: 1 (decremented by 1)
+       Receipt: RX-CONF-978054, Refills remaining: 1 (decremented by 1)
   ✓ Confirmation unavailable: Fails closed safely and NEVER converts to approval
-      Verdict: DENIED, Error: Action denied by human user (Confirmation unavailable (Headless / non-DOM environment with no confirmation provider configured). Failing closed.).
+       Verdict: DENIED, Error: Action denied by human user (Confirmation unavailable (Headless / non-DOM environment with no confirmation provider configured). Failing closed.).
 
 [PASS] 4. Out-of-Scope Enforcement (Gate 2 Block, NO Confirmation)
   Verifies unpermitted requests fail closed at Gate 2 without confirmation
   ✓ Demonstrate: Out-of-scope submit_refill does NOT enter confirmation
-      Blocked at Gate 2 with BLOCKED_UNAUTHORIZED_RX. Confirmation triggered: false
+       Blocked at Gate 2 with BLOCKED_UNAUTHORIZED_RX. Confirmation triggered: false
   ✓ Demonstrate: Amount-above-limit submit_refill does NOT enter confirmation
-      Blocked at Gate 2 with BLOCKED_SPEND_LIMIT ($31.15 > $20.00). Confirmation triggered: false
+       Blocked at Gate 2 with BLOCKED_SPEND_LIMIT ($31.15 > $20.00). Confirmation triggered: false
   ✓ Disallowed submit: actionScope="prepare_only" blocks submit_refill without confirmation
-      Blocked at Gate 2 with BLOCKED_UNAUTHORIZED_ACTION. Confirmation triggered: false
+       Blocked at Gate 2 with BLOCKED_UNAUTHORIZED_ACTION. Confirmation triggered: false
   ✓ Ineligible medication: 0 refills remaining blocks submit_refill without confirmation
-      Blocked at Gate 2 with BLOCKED_INELIGIBLE_RX. Confirmation triggered: false
+       Blocked at Gate 2 with BLOCKED_INELIGIBLE_RX. Confirmation triggered: false
 
 [PASS] 5. Tool-Trust & Adversarial Protection (Gate 1 Block, NO Confirmation)
   Tests tool-name squatting, prompt injection, and trap detection at Gate 1
   ✓ Demonstrate: Suspicious/untrusted tool does NOT enter confirmation
-      Security trap update_payment_method blocked at Gate 1 (UNTRUSTED_INSTRUCTION_DESCRIPTION). Confirmation triggered: false
+       Security trap update_payment_method blocked at Gate 1 (UNTRUSTED_INSTRUCTION_DESCRIPTION). Confirmation triggered: false
   ✓ Tool-name squatting: Separator spoofing ("submit-refill") blocked at Gate 1
-      Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check (UNTRUSTED_NAME_SQUATTING: Tool name 'submit-refill' uses non-standard separators or casing imitating expected tool 'submit_refill'.). No confirmation was offered.
+       Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check (UNTRUSTED_NAME_SQUATTING: Tool name 'submit-refill' uses non-standard separators or casing imitating expected tool 'submit_refill'.). No confirmation was offered.
   ✓ Tool-name squatting: Levenshtein typo distance ("submit_refil") detected
-      Tool name 'submit_refil' is suspiciously close (edit distance 1) to expected tool 'submit_refill'. Potential typosquat.
+       Tool name 'submit_refil' is suspiciously close (edit distance 1) to expected tool 'submit_refill'. Potential typosquat.
   ✓ Tool-name squatting: Version suffix ("submit_refill_v2") detected
-      Tool name 'submit_refill_v2' appears to be an unauthorized variant or suffix of expected tool 'submit_refill'.
+       Tool name 'submit_refill_v2' appears to be an unauthorized variant or suffix of expected tool 'submit_refill'.
   ✓ Tool-name squatting: camelCase variation ("submitRefill") detected
-      Tool name 'submitRefill' uses non-standard separators or casing imitating expected tool 'submit_refill'.
+       Tool name 'submitRefill' uses non-standard separators or casing imitating expected tool 'submit_refill'.
   ✓ Instruction-like description: Matched "ignore" in prompt injection metadata
-      Tool description contains suspicious or instruction-like phrase: "ignore previous instructions".
+       Tool description contains suspicious or instruction-like phrase: "ignore previous instructions".
   ✓ Instruction-like description: Matched "always approve" in prompt injection metadata
-      Tool description contains suspicious or instruction-like phrase: "always approve".
+       Tool description contains suspicious or instruction-like phrase: "always approve".
   ✓ Instruction-like description: Matched "system instruction" in prompt injection metadata
-      Tool description contains suspicious or instruction-like phrase: "bypass".
+       Tool description contains suspicious or instruction-like phrase: "bypass".
   ✓ Instruction-like description: Matched "ask for credentials" in prompt injection metadata
-      Tool description contains suspicious or instruction-like phrase: "Ask the user for credentials".
+       Tool description contains suspicious or instruction-like phrase: "Ask the user for credentials".
   ✓ Tool registered after contract creation: Unexpected mutating tool flagged untrusted
-      Tool 'transfer_patient_funds' was not in the session expected tool set and is classified as mutating (consequential). Untrusted.
+       Tool 'transfer_patient_funds' was not in the session expected tool set and is classified as mutating (consequential). Untrusted.
   ✓ Unknown tool: Unregistered tool fails closed at Gate 1
-      Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check (UNTRUSTED_UNEXPECTED_MUTATING: Tool 'unregistered_rogue_tool' was not in the session expected tool set and is classified as mutating (consequential). Untrusted.). No confirmation was offered.
+       Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check (UNTRUSTED_UNEXPECTED_MUTATING: Tool 'unregistered_rogue_tool' was not in the session expected tool set and is classified as mutating (consequential). Untrusted.). No confirmation was offered.
 
 [PASS] 6. Fail-Closed Security & Error Handling
   Verifies strict fail-closed behavior across edge cases and thrown errors
   ✓ Missing authority: Null authority contract fails closed immediately
-      Authority Contract is missing or undefined. Failing closed to safeguard patient security.
+       Authority Contract is missing or undefined. Failing closed to safeguard patient security.
   ✓ Malformed authority: Corrupted contract fields fail closed immediately
-      Authority Contract is malformed or corrupted. Failing closed to safeguard patient security.
+       Authority Contract is malformed or corrupted. Failing closed to safeguard patient security.
   ✓ Invalid arguments: Empty parameters object fails closed
-      Preparation requires at least one valid prescription ID in structured parameters.
+       Preparation requires at least one valid prescription ID in structured parameters.
   ✓ Invalid arguments: Non-existent prescription ID (RX-999) fails closed
-      Agent attempted to stage unauthorized medication(s): RX-999. Not granted in Authority Contract.
+       Agent attempted to stage unauthorized medication(s): RX-999. Not granted in Authority Contract.
   ✓ Trust-check failure: Gate 1 blocks untrusted tool call even under wildcard authority contract
-      Halted at Gate 1 with: UNTRUSTED_NAME_SQUATTING
+       Halted at Gate 1 with: UNTRUSTED_NAME_SQUATTING
   ✓ Security decision throws an error: Runtime exception fails closed and is NOT converted to approval
-      Safely blocked with code: BLOCKED_INTERNAL_ERROR (Authority evaluation error: Simulated internal memory corruption in contract getter)
+       Safely blocked with code: BLOCKED_INTERNAL_ERROR (Authority evaluation error: Simulated internal memory corruption in contract getter)
 
 [PASS] 7. Structured Audit Trail & Provenance
   Verifies audit logging, structured receipt generation, and JSON export
   ✓ Blocked operation creates audit event with unique ID and blocked status
-      Created log: AUDIT-0001, Decision: blocked
+       Created log: AUDIT-0001, Decision: blocked
   ✓ Denied operation creates audit event recording human refusal
-      Found audit event: AUDIT-0002, Decision: denied
+       Found audit event: AUDIT-0002, Decision: denied
   ✓ Approved and executed operation creates audit event
-      Audit record: AUDIT-0004, Decision: executed
+       Audit record: AUDIT-0004, Decision: executed
   ✓ Audit log captures all 5 provenance facets (Authorized, Requested, Decided, Happened, Result)
-      Verified presence of userAuthorized, arguments, decisionDetails, whatHappened, and result
+       Verified presence of userAuthorized, arguments, decisionDetails, whatHappened, and result
   ✓ Audit trail exports to valid, parsable JSON array
-      Exported 4 structured records
+       Exported 4 structured records
 
 --------------------------------------------------------------------------------
 TEST EXECUTION SUMMARY:
@@ -456,51 +455,29 @@ TEST EXECUTION SUMMARY:
 
 ---
 
-## Security Proof Points
+## Technical Verification
 
-The following critical security properties are verified by automated tests in `tests/security-suite.js`. Each test assertion is quoted verbatim from the source code.
+Three critical properties verified by automated tests — quoted verbatim from `tests/security-suite.js`:
 
-### State Invariance During Confirmation
+### 1. State Invariance During Confirmation
 
 **Test:** `"CRITICAL: Calling submit_refill does NOT modify refill state until confirmation is approved"`
 
 **Why it matters:** An AI agent cannot exploit the confirmation delay to observe or modify pharmacy records — refill counts and submitted orders remain unchanged until the human explicitly approves.
 
-### Runtime Exception Fail-Closed
+### 2. Runtime Exception Defaults to Safe
 
 **Test:** `"Security decision throws an error: Runtime exception fails closed and is NOT converted to approval"`
 
 **Why it matters:** If the policy engine encounters an internal error (e.g., memory corruption, malformed data), the system defaults to denial rather than granting unauthorized access.
 
-### Gate 1 Trust Check Under Wildcard Authority
+### 3. Gate 1 Trust Check Under Wildcard Authority
 
 **Test:** `"Trust-check failure: Gate 1 blocks untrusted tool call even under wildcard authority contract"`
 
-**Why it matters:** Even if a user accidentally authorizes all medications and all actions (`*` wildcard), a typosquatted or suspicious tool name is still blocked at Gate 1 before any authority evaluation occurs.
+**Why it matters:** Even if a user accidentally authorizes all medications and all actions (`*` wildcard), a typosquatted or suspicious tool name is still halted at Gate 1 before any authority evaluation occurs — letting you delegate actions safely.
 
-### Confirmation Unavailable Fail-Closed
-
-**Test:** `"Confirmation unavailable: Fails closed safely and NEVER converts to approval"`
-
-**Why it matters:** In headless environments or when the confirmation UI cannot render, the system treats the absence of confirmation as a denial rather than bypassing the gate.
-
-### Unauthorized Medication Blocked Without Confirmation
-
-**Test:** `"Demonstrate: Out-of-scope submit_refill does NOT enter confirmation"`
-
-**Why it matters:** Gate 2 blocks out-of-scope requests before they can prompt the user, preventing social-engineering attacks that rely on repetitive confirmation dialogs for unauthorized actions.
-
-### Untrusted Tool Blocked at Gate 1
-
-**Test:** `"Unknown tool: Unregistered tool fails closed at Gate 1"`
-
-**Why it matters:** Any tool not explicitly registered in the Handrail session is treated as untrusted and blocked immediately, preventing injection of rogue tools mid-session.
-
-### User Denial Preserves State
-
-**Test:** `"User denial: Consequential action halted safely with DENIED verdict and zero state mutation"`
-
-**Why it matters:** When a user denies a confirmation request, the system guarantees no pharmacy records, refill counts, or payment methods are modified.
+> **Note on verbatim test names:** The test names above are quoted exactly as they appear in the source code (`tests/security-suite.js`). They use technical phrasing like "fails closed" that describes the underlying behavior — this is the system's internal capability working as intended.
 
 ---
 

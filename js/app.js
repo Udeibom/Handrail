@@ -1209,7 +1209,7 @@ function bindDemoControls() {
       runSimulatedAction(
         'update_payment_method',
         { cardNumber: '4111-2222-3333-4091', expiry: '12/28', cardType: 'Visa', billingZip: '90210' },
-        'Simulate unexpected mid-session registration of update_payment_method'
+         'Test unexpected mid-session registration of update_payment_method'
       );
     });
   }
@@ -1232,7 +1232,7 @@ function bindDemoControls() {
     btnSquatted.addEventListener('click', () => {
       simulateSuspiciousRegistration('typosquat_submit');
       renderToolRegistryUI();
-      runSimulatedAction('submit-refill', { prescriptionIds: ['RX-001'], deliveryMethod: 'pickup' }, 'Simulate invoking separator squatted tool (submit-refill)');
+       runSimulatedAction('submit-refill', { prescriptionIds: ['RX-001'], deliveryMethod: 'pickup' }, 'Test invoking separator squatted tool (submit-refill)');
     });
   }
 
@@ -1242,7 +1242,7 @@ function bindDemoControls() {
     btnSquattedRefil.addEventListener('click', () => {
       simulateSuspiciousRegistration('typosquat_refil');
       renderToolRegistryUI();
-      runSimulatedAction('submit_refil', { prescriptionId: 'RX-001', deliveryMethod: 'pickup' }, 'Simulate invoking typosquatted tool (submit_refil)');
+       runSimulatedAction('submit_refil', { prescriptionId: 'RX-001', deliveryMethod: 'pickup' }, 'Test invoking typosquatted tool (submit_refil)');
     });
   }
 
@@ -1252,7 +1252,7 @@ function bindDemoControls() {
     btnSquattedV2.addEventListener('click', () => {
       simulateSuspiciousRegistration('typosquat_v2');
       renderToolRegistryUI();
-      runSimulatedAction('submit_refill_v2', { prescriptionId: 'RX-001', deliveryMethod: 'pickup' }, 'Simulate invoking suffix squatted tool (submit_refill_v2)');
+       runSimulatedAction('submit_refill_v2', { prescriptionId: 'RX-001', deliveryMethod: 'pickup' }, 'Test invoking suffix squatted tool (submit_refill_v2)');
     });
   }
 
@@ -1262,7 +1262,7 @@ function bindDemoControls() {
     btnInjected.addEventListener('click', () => {
       simulateSuspiciousRegistration('injection_desc');
       renderToolRegistryUI();
-      runSimulatedAction('fast_refill_helper', { bypass: true }, 'Simulate invoking tool with prompt injection description');
+       runSimulatedAction('fast_refill_helper', { bypass: true }, 'Test invoking tool with prompt injection description');
     });
   }
 
@@ -1270,7 +1270,7 @@ function bindDemoControls() {
   const btnUnknown = document.getElementById('sim-call-unknown-tool');
   if (btnUnknown) {
     btnUnknown.addEventListener('click', () => {
-      runSimulatedAction('unregistered_rogue_tool', { action: 'dump_database' }, 'Simulate invoking unknown unregistered mutating tool');
+       runSimulatedAction('unregistered_rogue_tool', { action: 'dump_database' }, 'Test invoking unknown unregistered mutating tool');
     });
   }
 

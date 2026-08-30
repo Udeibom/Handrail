@@ -139,9 +139,9 @@
 
           <!-- Deterministic Security Boundary Pipeline Diagram -->
           <div class="security-ordering-card">
-            <h3 class="security-ordering-heading">
-              <span aria-hidden="true">🛡️</span> Handrail 4-Gate Execution Pipeline &amp; Security Boundary
-            </h3>
+             <h3 class="security-ordering-heading">
+               <span aria-hidden="true">🛡️</span> Handrail 4-Gate Execution Pipeline &amp; Consent Boundary
+             </h3>
             <div class="pipeline-flow" role="list" aria-label="Security Execution Order">
               <div class="pipeline-step" role="listitem">1. Tool Invocation</div>
               <span class="pipeline-arrow" aria-hidden="true">&rarr;</span>
@@ -166,7 +166,7 @@
               </div>
             </div>
             <p class="pipeline-note">
-              <strong>Fail-Closed Security Principle:</strong> Tool-Trust (Gate 1) runs before Authority (Gate 2) and Confirmation (Gate 3). Suspicious tools or unauthorized modifications fail closed immediately and <strong>NEVER reach human confirmation</strong>.
+               <strong>Defaults-to-Safe Principle:</strong> Tool-Trust (Gate 1) runs before Authority (Gate 2) and Confirmation (Gate 3). Suspicious tools or unauthorized modifications default to safe immediately and <strong>NEVER reach human confirmation</strong>.
             </p>
           </div>
 
@@ -235,7 +235,7 @@
             </button>
           </div>
           <div id="test-results-container">
-            <p class="text-muted">Click &ldquo;Run Test Suite&rdquo; to execute deterministic test suite verifying contract bounds, spend caps, and WebMCP definitions.</p>
+            <p class="text-muted">Click &ldquo;Run Test Suite&rdquo; to execute deterministic test suite verifying contract bounds, spend caps, and WebMCP definitions. <a href="https://github.com/Udeibom/Handrail#technical-verification" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary);">View technical verification details &rarr;</a></p>
           </div>
         </section>
 
@@ -438,8 +438,8 @@
         <section class="panel-card" aria-labelledby="trust-heading" id="trust-panel-section">
           <div class="panel-header">
             <div>
-              <h2 id="trust-heading" class="panel-heading">SECURITY / TRUST STATUS</h2>
-              <p class="panel-subtitle">Cryptographic bounds &amp; deterministic policy metrics</p>
+                <h2 id="trust-heading" class="panel-heading">CONSENT / TRUST STATUS</h2>
+                <p class="panel-subtitle">Cryptographic bounds &amp; deterministic policy metrics</p>
             </div>
           </div>
 
@@ -476,7 +476,7 @@
             <div>
               <div class="dev-banner-badge">Developer / Demo Mode</div>
               <h2 id="agent-controls-heading" class="panel-heading">DEVELOPER / DEMO CONTROLS</h2>
-              <p class="panel-subtitle">Interactive WebMCP agent scenarios with <strong>NO security bypass</strong>.</p>
+              <p class="panel-subtitle">Interactive WebMCP agent scenarios with <strong>NO consent bypass</strong>.</p>
             </div>
           </div>
 
@@ -494,35 +494,35 @@
               </div>
             </button>
 
-            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="Simulate Out-of-Scope Medication Refill Attempt">
-              <span class="btn-icon">⛔</span>
-              <div class="btn-text-block">
-                <strong>Simulate: Out-of-Scope Medication</strong>
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="Test Out-of-Scope Medication Refill Attempt">
+               <span class="btn-icon">⛔</span>
+               <div class="btn-text-block">
+                 <strong>Test: Out-of-Scope Medication</strong>
                 <span class="btn-subtext">Attempt submit_refill(RX-002) with Lisinopril-only authority → Blocked</span>
               </div>
             </button>
 
-            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="Simulate Amount Limit Exceeded Refill Attempt">
-              <span class="btn-icon">⛔</span>
-              <div class="btn-text-block">
-                <strong>Simulate: Amount Limit Failure</strong>
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="Test Amount Limit Exceeded Refill Attempt">
+               <span class="btn-icon">⛔</span>
+               <div class="btn-text-block">
+                 <strong>Test: Amount Limit Failure</strong>
                 <span class="btn-subtext">Set max spend $10.00, attempt $12.40 Lisinopril refill → Blocked</span>
               </div>
             </button>
 
-            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="Simulate Prepare-Only Restriction Refill Attempt">
-              <span class="btn-icon">⚠️</span>
-              <div class="btn-text-block">
-                <strong>Simulate: Prepare-Only Restriction</strong>
-                <span class="btn-subtext">Prepare allowed → submit_refill blocked with NO confirmation</span>
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="Test Prepare-Only Restriction Refill Attempt">
+               <span class="btn-icon">⚠️</span>
+               <div class="btn-text-block">
+                 <strong>Test: Prepare-Only Restriction</strong>
+                 <span class="btn-subtext">Prepare allowed → submit_refill defaults to safe with NO confirmation</span>
               </div>
             </button>
 
-            <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="Simulate Suspicious Security Trap Tool Call">
-              <span class="btn-icon">🛡️</span>
-              <div class="btn-text-block">
-                <strong>Simulate: Suspicious Security Trap</strong>
-                <span class="btn-subtext">Call update_payment_method → Gate 1 Trust check fails closed</span>
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="Test Suspicious Delegation Trap Tool Call">
+               <span class="btn-icon">🛡️</span>
+               <div class="btn-text-block">
+                 <strong>Test: Suspicious Delegation Trap</strong>
+                 <span class="btn-subtext">Call update_payment_method → Gate 1 Trust check defaults to safe</span>
               </div>
             </button>
 
@@ -561,35 +561,35 @@
 
             <!-- Security Trap & Mid-Session Trust Demos -->
             <div class="simulation-group-header">
-              <span class="group-title-badge">Security Trap &amp; Mid-Session Trust Tests</span>
+              <span class="group-title-badge">Delegation Trap &amp; Mid-Session Trust Tests</span>
             </div>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Simulate unexpected tool registration during active session">
-              Simulate Unexpected Mid-Session Registration
+             <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Test unexpected tool registration during active session">
+               Test Unexpected Mid-Session Registration
             </button>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Simulate calling update_payment_method trap tool">
-              Simulate: update_payment_method (Direct Call)
+             <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Test calling update_payment_method trap tool">
+               Test: update_payment_method (Direct Call)
             </button>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Simulate calling typosquatted tool submit-refill">
-              Simulate: Typosquat Separator (submit-refill)
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Test calling typosquatted tool submit-refill">
+               Test: Typosquat Separator (Submit-refill)
             </button>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Simulate calling typosquatted tool submit_refil">
-              Simulate: Typosquat Edit Distance (submit_refil)
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Test calling typosquatted tool submit_refil">
+               Test: Typosquat Edit Distance (submit_refil)
             </button>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Simulate calling suffix squatted tool submit_refill_v2">
-              Simulate: Suffix Squatting (submit_refill_v2)
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Test calling suffix squatted tool submit_refill_v2">
+               Test: Suffix Squatting (submit_refill_v2)
             </button>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Simulate registering a tool with prompt injection description">
-              Simulate: Injected Description (fast_refill_helper)
+             <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Test registering a tool with prompt injection description">
+               Test: Injected Description (fast_refill_helper)
             </button>
 
-            <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Simulate invoking an unknown unmarked tool">
-              Simulate: Unknown Unregistered Tool
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Test invoking an unknown unmarked tool">
+               Test: Unknown Unregistered Tool
             </button>
 
             <!-- Developer Panel Utilities -->
@@ -638,7 +638,7 @@
               </div>
             </div>
             <p id="webmcp-status-desc" style="font-size: 0.8rem; color: var(--color-slate-600); line-height: 1.4; margin: 0;">
-              First-party page-side JavaScript calls <code>document.modelContext.registerTool</code> when present. In standard browsers without native WebMCP flags, the API is not faked or simulated; Handrail operates canonical tools through its deterministic test harness.
+               First-party page-side JavaScript calls <code>document.modelContext.registerTool</code> when present. In standard browsers without native WebMCP flags, the API is not faked or emulated; Handrail operates canonical tools through its deterministic test harness.
             </p>
           </div>
         </section>
