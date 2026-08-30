@@ -727,14 +727,16 @@ function renderWebMcpInfo() {
   }
 
   if (registeredCountEl) {
-    registeredCountEl.textContent = `${toolRegistry.getAllTools().length} Tools in Registry (${avail.isAvailable ? 'Native Bound' : 'Test Harness Active'})`;
+    const primaryCount = WEBMCP_PRIMARY_TOOL_DEFINITIONS.length;
+    const aliasCount = toolRegistry.getAllTools().length - primaryCount;
+    registeredCountEl.textContent = `${primaryCount} Tools Registered${aliasCount > 0 ? ` (+ ${aliasCount} aliases)` : ''} (${avail.isAvailable ? 'Native WebMCP' : 'Test Harness'})`;
   }
 
   if (statusBadge && statusDesc) {
     if (avail.isAvailable) {
       statusBadge.textContent = 'Native WebMCP Active';
       statusBadge.className = 'status-badge status-active';
-      statusDesc.innerHTML = `Registered <strong>${state.webMcpStatus.registeredCount || 5} tools</strong> directly with <code>document.modelContext.registerTool</code>.`;
+      statusDesc.innerHTML = `Registered <strong>${state.webMcpStatus.registeredCount || WEBMCP_PRIMARY_TOOL_DEFINITIONS.length} tools</strong> directly with <code>document.modelContext.registerTool</code>.`;
     } else {
       statusBadge.textContent = 'Dev Test Harness Active';
       statusBadge.className = 'status-badge status-harness';
