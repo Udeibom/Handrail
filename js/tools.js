@@ -50,6 +50,7 @@ import {
   getExpectedTools,
   getActiveSessionId,
 } from './trust.js';
+import { updateUIAfterExecution } from './ui-update.js';
 
 /**
  * Metadata definitions for the exactly 5 expected primary Handrail WebMCP tools.
@@ -1030,7 +1031,12 @@ export async function registerWebMCPTools(getActiveContract) {
           readOnlyHint: toolDef.readOnlyHint,
           execute: async (params) => {
             const activeContract = typeof getActiveContract === 'function' ? getActiveContract() : null;
-            return executeHandrailTool(toolDef.name, params, activeContract);
+            const result = await executeHandrailTool(toolDef.name, params, activeContract);
+
+            // Update UI to reflect the execution (same as demo button path)
+            updateUIAfterExecution(result, toolDef.name);
+
+            return result;
           },
         });
         console.log(`[WebMCP Debug] registerTool returned:`, registerPromise);

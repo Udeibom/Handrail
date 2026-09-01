@@ -52,6 +52,8 @@ import {
 } from './tools.js';
 
 import { runAllAuthorityTests } from '../tests/authority-tests.js';
+import { setPostExecutionCallback } from './execution-callback.js';
+import { updateUIAfterExecution } from './ui-update.js';
 
 // Application State
 let state = {
@@ -102,6 +104,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAuthorityContractControls();
   renderTrustPanel();
   renderWebMcpInfo();
+
+  // Register callback for native WebMCP execution UI updates
+  setPostExecutionCallback((result, toolName) => {
+    renderPrescriptionList();
+    renderPrescriptionDetails();
+    renderTrustPanel();
+    renderRefillPreparation();
+    renderReceiptUI();
+    renderToolRegistryUI();
+
+    const agentStatusEl = document.getElementById('agent-status-indicator');
+    if (agentStatusEl) {
+      if (result.success) {
+        agentStatusEl.textContent = `Agent completed: ${toolName} (Verdict: ${result.verdict})`;
+        agentStatusEl.className = 'agent-status status-success';
+      } else if (result.verdict === 'BLOCKED') {
+        agentStatusEl.textContent = `Agent blocked: ${toolName} (${result.code || 'BLOCKED'})`;
+        agentStatusEl.className = 'agent-status status-failed';
+      } else {
+        agentStatusEl.textContent = `Agent halted: ${toolName} (Verdict: ${result.verdict} - ${result.code || 'DENIED'})`;
+        agentStatusEl.className = 'agent-status status-failed';
+      }
+    }
+  });
   updateAuditLogUI();
   renderReceiptUI();
 
@@ -126,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 /**
  * Renders the fictional patient info section.
  */
-function renderPatientProfile() {
+export function renderPatientProfile() {
   const container = document.getElementById('patient-details-content');
   if (!container) return;
 
@@ -169,7 +195,7 @@ function renderPatientProfile() {
 /**
  * Renders the prescription list in RefillRx.
  */
-function renderPrescriptionList() {
+export function renderPrescriptionList() {
   const tableBody = document.getElementById('prescriptions-table-body');
   const fallbackList = document.getElementById('prescription-list');
   const countBadge = document.getElementById('rx-count-badge');
@@ -379,7 +405,7 @@ function renderPrescriptionList() {
  * Renders the detailed view of a selected prescription.
  * @param {string} rxId
  */
-function renderPrescriptionDetails(rxId) {
+export function renderPrescriptionDetails(rxId) {
   const container = document.getElementById('prescription-detail-content');
   if (!container) return;
 
@@ -449,7 +475,7 @@ function renderPrescriptionDetails(rxId) {
 /**
  * Renders the staged refill calculations and pre-flight policy checks.
  */
-function renderRefillPreparation() {
+export function renderRefillPreparation() {
   const container = document.getElementById('refill-preparation-content');
   if (!container) return;
 
@@ -582,7 +608,7 @@ async function updateContractFingerprintDisplay() {
 /**
  * Renders the Trust & Integrity Panel and Registered Tools.
  */
-function renderTrustPanel() {
+export function renderTrustPanel() {
   const metrics = getTrustMetrics();
   const invocationsEl = document.getElementById('metric-invocations');
   const approvedEl = document.getElementById('metric-approved');
@@ -651,7 +677,7 @@ export function renderAgentActivity(statusText = null, statusClass = null) {
 /**
  * Renders the WebMCP Tool Registry & Deterministic Trust Inspector UI.
  */
-function renderToolRegistryUI() {
+export function renderToolRegistryUI() {
   const container = document.getElementById('registered-tools-list');
   const countBadge = document.getElementById('registry-count-badge');
   if (!container) return;
@@ -861,32 +887,20 @@ function bindDemoControls() {
 
     try {
       const result = await executeHandrailTool(name, params, state.activeContract);
-      renderPrescriptionList();
-      renderPrescriptionDetails();
-      renderTrustPanel();
-      renderRefillPreparation();
-      renderReceiptUI();
-      renderToolRegistryUI();
+      updateUIAfterExecution(result, name);
 
-      if (agentStatusEl) {
-        if (result.success) {
-          agentStatusEl.textContent = `Agent completed: ${name} (Verdict: ${result.verdict})`;
-          agentStatusEl.className = 'agent-status status-success';
-          announce(`Agent completed ${name}. Verdict: ${result.verdict}.`);
-        } else if (result.verdict === 'BLOCKED') {
-          agentStatusEl.textContent = `Agent blocked: ${name} (${result.code || 'BLOCKED'})`;
-          agentStatusEl.className = 'agent-status status-failed';
-          const msg = result.error || "Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check. No confirmation was offered.";
-          announce(msg);
-        } else {
-          agentStatusEl.textContent = `Agent halted: ${name} (Verdict: ${result.verdict} - ${result.code || 'DENIED'})`;
-          agentStatusEl.className = 'agent-status status-failed';
-          announce(`Agent halted: ${result.error || 'Action denied by user.'}`);
-        }
+      if (result.success) {
+        announce(`Agent completed ${name}. Verdict: ${result.verdict}.`);
+      } else if (result.verdict === 'BLOCKED') {
+        const msg = result.error || "Blocked. This tool was not part of your authority contract and failed Handrail's tool-trust check. No confirmation was offered.";
+        announce(msg);
+      } else {
+        announce(`Agent halted: ${result.error || 'Action denied by user.'}`);
       }
       return result;
     } catch (err) {
       console.error('Agent execution error:', err);
+      const agentStatusEl = document.getElementById('agent-status-indicator');
       if (agentStatusEl) {
         agentStatusEl.textContent = `Agent error: ${err.message}`;
         agentStatusEl.className = 'agent-status status-failed';
