@@ -107,6 +107,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Register callback for native WebMCP execution UI updates
   setPostExecutionCallback((result, toolName) => {
+    // Sync state with data layer (submit_refill modifies activePrescriptions directly)
+    state.prescriptions = getPrescriptions();
+
     renderPrescriptionList();
     renderPrescriptionDetails();
     renderTrustPanel();
@@ -1364,6 +1367,7 @@ function bindDemoControls() {
   if (btnResetDemoFull) {
     btnResetDemoFull.addEventListener('click', async () => {
       resetPharmacyState();
+      state.prescriptions = getPrescriptions();
       toolRegistry.reset();
       state.activeContract = createAuthorityContract(DEFAULT_AUTHORITY_CONTRACT);
       state.stagedRefillIds = ['RX-001'];
