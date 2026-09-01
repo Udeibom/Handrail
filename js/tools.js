@@ -1010,7 +1010,7 @@ let unexpectedRegistrationHandler = null;
  * @param {Function} getActiveContract - Callback returning current active authority contract
  * @returns {{ registeredCount: number, nativeSupported: boolean, registeredTools: string[], availability: object }}
  */
-export function registerWebMCPTools(getActiveContract) {
+export async function registerWebMCPTools(getActiveContract) {
   const availability = checkWebMCPNativeAvailability();
   let registeredCount = 0;
   const registeredTools = [];
@@ -1021,7 +1021,8 @@ export function registerWebMCPTools(getActiveContract) {
 
     for (const toolDef of toolsToRegister) {
       try {
-        document.modelContext.registerTool({
+        console.log(`[WebMCP Debug] About to call registerTool for: ${toolDef.name}`);
+        const registerPromise = document.modelContext.registerTool({
           name: toolDef.name,
           description: toolDef.description,
           inputSchema: toolDef.inputSchema,
@@ -1032,8 +1033,16 @@ export function registerWebMCPTools(getActiveContract) {
             return executeHandrailTool(toolDef.name, params, activeContract);
           },
         });
+        console.log(`[WebMCP Debug] registerTool returned:`, registerPromise);
+        console.log(`[WebMCP Debug] Is promise?`, registerPromise instanceof Promise);
+
+        // Await the Promise to ensure registration actually succeeds
+        await registerPromise;
+        console.log(`[WebMCP Debug] registerTool resolved successfully for ${toolDef.name}`);
+
         registeredCount++;
         registeredTools.push(toolDef.name);
+        console.log(`[WebMCP Debug] Confirmed registeredCount: ${registeredCount}`);
       } catch (err) {
         console.error(`Failed to register WebMCP tool ${toolDef.name} on document.modelContext:`, err);
       }
@@ -1044,6 +1053,16 @@ export function registerWebMCPTools(getActiveContract) {
     if (document.modelContext && typeof document.modelContext === 'object') {
       setupUnexpectedRegistrationListener();
     }
+  }
+
+  // Verify registration by checking getTools()
+  try {
+    if (document.modelContext && typeof document.modelContext.getTools === 'function') {
+      const tools = await document.modelContext.getTools();
+      console.log(`[WebMCP Debug] getTools() returned ${tools.length} tools:`, tools.map(t => t.name));
+    }
+  } catch (err) {
+    console.error('[WebMCP Debug] Error calling getTools():', err);
   }
 
   return {
