@@ -51,7 +51,7 @@
               <h2 id="patient-heading" class="panel-heading">Verified Patient Record</h2>
               <p class="panel-subtitle">Synthetic Demo Patient — Fictional Data for Demonstration</p>
             </div>
-            <span class="badge-eligible eligibility-badge">Account Verified</span>
+            <span class="badge-eligible eligibility-badge" role="status" aria-label="Account status: Verified">Account Verified</span>
           </div>
           <div id="patient-details-content">
             <!-- Rendered by JavaScript -->
@@ -65,7 +65,7 @@
               <h2 id="prescriptions-heading" class="panel-heading">Your Prescriptions</h2>
               <p class="panel-subtitle">Lisinopril, Atorvastatin, and Metformin &mdash; Select to view details or stage for refill</p>
             </div>
-            <span class="rx-id-pill" id="rx-count-badge">3 Prescriptions</span>
+            <span class="rx-id-pill" id="rx-count-badge" role="status" aria-label="Prescription count: 3 Prescriptions">3 Prescriptions</span>
           </div>
 
           <div class="table-responsive">
@@ -134,7 +134,7 @@
               <h2 id="registry-heading" class="panel-heading">WebMCP Tool Registry &amp; Trust Inspector</h2>
               <p class="panel-subtitle">First-party tool metadata, explicit read-only/mutating classification, and deterministic trust verification</p>
             </div>
-            <span class="rx-id-pill" id="registry-count-badge">5 Expected Tools Active</span>
+            <span class="rx-id-pill" id="registry-count-badge" role="status" aria-label="Registry status: 5 Expected Tools Active">5 Expected Tools Active</span>
           </div>
 
           <!-- Deterministic Security Boundary Pipeline Diagram -->
@@ -193,7 +193,7 @@
               <h2 id="audit-heading" class="panel-heading">Structured Audit Trail</h2>
               <p class="panel-subtitle">Deterministic session record of all agent invocations, policy evaluations, and human consent decisions</p>
             </div>
-            <span class="badge-refill-available rx-refills-badge" id="audit-count-badge">0 events</span>
+            <span class="badge-refill-available rx-refills-badge" id="audit-count-badge" role="status" aria-label="Audit events: 0 events">0 events</span>
           </div>
 
           <div class="audit-controls-bar">
@@ -209,10 +209,10 @@
             </div>
 
             <div class="audit-btn-actions">
-              <button type="button" class="btn btn-secondary btn-sm" id="export-audit-btn" aria-label="Export audit log as JSON file">
+              <button type="button" class="btn btn-secondary btn-sm" id="export-audit-btn" aria-label="Export JSON: Export audit log as JSON file">
                 Export JSON
               </button>
-              <button type="button" class="btn btn-secondary btn-sm" id="clear-audit-btn" aria-label="Clear session audit logs">
+              <button type="button" class="btn btn-secondary btn-sm" id="clear-audit-btn" aria-label="Clear Logs: Clear session audit logs">
                 Clear Logs
               </button>
             </div>
@@ -260,7 +260,7 @@
               <span class="group-title-badge">Primary Demo Scenarios</span>
             </div>
 
-            <button type="button" class="btn btn-primary btn-full demo-flow-btn demo-primary-btn" id="sim-run-successful-flow" aria-label="Run Full Successful Agent Flow: Search to Details to Prepare to Submit">
+            <button type="button" class="btn btn-primary btn-full demo-flow-btn demo-primary-btn" id="sim-run-successful-flow" aria-label="▶ Run Successful Agent Flow: Search → Details → Prepare ($12.40) → Human Confirmation → Refill">
               <span class="btn-icon">▶</span>
               <div class="btn-text-block">
                 <strong>Run Successful Agent Flow</strong>
@@ -268,7 +268,7 @@
               </div>
             </button>
 
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="Test Out-of-Scope Medication Refill Attempt">
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="⛔ Test: Out-of-Scope Medication: Attempt submit_refill(RX-002) with Lisinopril-only authority → Blocked">
                <span class="btn-icon">⛔</span>
                <div class="btn-text-block">
                  <strong>Test: Out-of-Scope Medication</strong>
@@ -276,7 +276,7 @@
                </div>
              </button>
 
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="Test Amount Limit Exceeded Refill Attempt">
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="⛔ Test: Amount Limit Failure: Set max spend $10.00, attempt $12.40 Lisinopril refill → Blocked">
                <span class="btn-icon">⛔</span>
                <div class="btn-text-block">
                  <strong>Test: Amount Limit Failure</strong>
@@ -284,7 +284,7 @@
                </div>
              </button>
 
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="Test Prepare-Only Restriction Refill Attempt">
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="⚠️ Test: Prepare-Only Restriction: Prepare allowed → submit_refill defaults to safe with NO confirmation">
                <span class="btn-icon">⚠️</span>
                <div class="btn-text-block">
                  <strong>Test: Prepare-Only Restriction</strong>
@@ -292,7 +292,7 @@
                </div>
              </button>
 
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="Test Suspicious Delegation Trap Tool Call">
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="🛡️ Test: Suspicious Delegation Trap: Call update_payment_method → Gate 1 Trust check defaults to safe">
                <span class="btn-icon">🛡️</span>
                <div class="btn-text-block">
                  <strong>Test: Suspicious Delegation Trap</strong>
@@ -338,33 +338,33 @@
               <span class="group-title-badge">Delegation Trap &amp; Mid-Session Trust Tests</span>
             </div>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Test unexpected tool registration during active session">
-               Test Unexpected Mid-Session Registration
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Test Unexpected Mid-Session Registration: unexpected tool registration during active session">
+                Test Unexpected Mid-Session Registration
+             </button>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Test calling update_payment_method trap tool">
-               Test: update_payment_method (Direct Call)
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Test: update_payment_method (Direct Call): Test calling update_payment_method trap tool">
+                Test: update_payment_method (Direct Call)
+             </button>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Test calling typosquatted tool submit-refill">
-               Test: Typosquat Separator (Submit-refill)
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Test: Typosquat Separator (Submit-refill): Test calling typosquatted tool submit-refill">
+                Test: Typosquat Separator (Submit-refill)
+             </button>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Test calling typosquatted tool submit_refil">
-               Test: Typosquat Edit Distance (submit_refil)
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Test: Typosquat Edit Distance (submit_refil): Test calling typosquatted tool submit_refil">
+                Test: Typosquat Edit Distance (submit_refil)
+             </button>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Test calling suffix squatted tool submit_refill_v2">
-               Test: Suffix Squatting (submit_refill_v2)
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Test: Suffix Squatting (submit_refill_v2): Test calling suffix squatted tool submit_refill_v2">
+                Test: Suffix Squatting (submit_refill_v2)
+             </button>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Test registering a tool with prompt injection description">
-               Test: Injected Description (fast_refill_helper)
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Test: Injected Description (fast_refill_helper): Test registering a tool with prompt injection description">
+                Test: Injected Description (fast_refill_helper)
+             </button>
 
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Test invoking an unknown unmarked tool">
-               Test: Unknown Unregistered Tool
-            </button>
+              <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Test: Unknown Unregistered Tool: Test invoking an unknown unmarked tool">
+                Test: Unknown Unregistered Tool
+             </button>
 
             <!-- Developer Panel Utilities -->
             <div class="simulation-group-header">
@@ -372,15 +372,15 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <button type="button" class="btn btn-secondary btn-full" id="dev-view-raw-audit-btn" aria-label="View raw structured audit events in JSON viewer">
+              <button type="button" class="btn btn-secondary btn-full" id="dev-view-raw-audit-btn" aria-label="📋 View Raw Audit Events (JSON): View raw structured audit events in JSON viewer">
                 📋 View Raw Audit Events (JSON)
               </button>
 
-              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-demo-full" aria-label="Reset entire demo state to baseline">
+              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-demo-full" aria-label="↺ Reset Full Demo State (Contract, Pharmacy, Tools): Reset entire demo state to baseline">
                 ↺ Reset Full Demo State (Contract, Pharmacy, Tools)
               </button>
 
-              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-registry" aria-label="Reset WebMCP tool registry to baseline">
+              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-registry" aria-label="↺ Reset Tool Registry Only (5 Expected): Reset WebMCP tool registry to baseline">
                 ↺ Reset Tool Registry Only (5 Expected)
               </button>
             </div>
@@ -434,7 +434,7 @@
               <h2 id="authority-heading" class="panel-heading">HANDRAIL AUTHORITY</h2>
               <p class="panel-subtitle">Set deterministic boundaries for AI agent actions</p>
             </div>
-            <span class="rx-id-pill" id="contract-id-badge">AUTH-CTR-2025-001</span>
+            <span class="rx-id-pill" id="contract-id-badge" role="status" aria-label="Contract ID: AUTH-CTR-2025-001">AUTH-CTR-2025-001</span>
           </div>
 
           <form id="authority-contract-form" onsubmit="event.preventDefault();">
@@ -658,7 +658,7 @@
     
     <div class="dialog-header">
       <h3 id="dialog-title" class="dialog-title">Confirm refill</h3>
-      <div id="dialog-description" class="dialog-policy-alert">
+      <div id="dialog-description" class="dialog-policy-alert" aria-live="assertive">
         <!-- Human readable description injected by JavaScript -->
       </div>
     </div>

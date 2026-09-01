@@ -98,6 +98,19 @@ body {
   outline-offset: 2px;
 }
 
+/* Ensure focus is visible on all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+summary:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
 /* Header & Branding */
 .site-header {
   background-color: var(--color-surface);
@@ -685,7 +698,7 @@ body {
 }
 
 .check-passed {
-  color: var(--color-success);
+  color: #166534;
 }
 
 .check-warning {

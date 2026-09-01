@@ -237,7 +237,7 @@ function renderPrescriptionList() {
                   class="btn btn-sm ${isStaged ? 'btn-primary' : 'btn-secondary'} stage-rx-btn" 
                   data-rx-id="${rx.id}"
                   aria-pressed="${isStaged}"
-                  aria-label="${isStaged ? 'Remove' : 'Stage'} ${rx.medication} ${rx.dosage} for Refill"
+                  aria-label="${isStaged ? '✓ Staged' : '+ Stage Refill'}: ${isStaged ? 'Remove' : 'Stage'} ${rx.medication} ${rx.dosage} for Refill"
                 >
                   ${isStaged ? '✓ Staged' : '+ Stage Refill'}
                 </button>
@@ -333,7 +333,7 @@ function renderPrescriptionList() {
                 class="btn btn-sm ${isStaged ? 'btn-primary' : 'btn-secondary'} stage-rx-btn" 
                 data-rx-id="${rx.id}"
                 aria-pressed="${isStaged}"
-                aria-label="${isStaged ? 'Remove' : 'Stage'} ${rx.medication} for Refill"
+                aria-label="${isStaged ? '✓ Staged for Refill' : '+ Stage Refill'}: ${isStaged ? 'Remove' : 'Stage'} ${rx.medication} for Refill"
               >
                 ${isStaged ? '✓ Staged for Refill' : '+ Stage Refill'}
               </button>
@@ -508,7 +508,7 @@ function renderRefillPreparation() {
 
       <!-- Handrail Pre-Flight Authority Check -->
       <div class="handrail-preflight ${isBlocked ? 'preflight-blocked' : 'preflight-allowed'}" role="status">
-        <h5 class="preflight-heading">Handrail Policy Pre-Flight:</h5>
+        <h4 class="preflight-heading">Handrail Policy Pre-Flight:</h4>
         <ul class="preflight-checks">
           <li class="${hasUnauthorized ? 'check-failed' : 'check-passed'}">
             Medication Scope:

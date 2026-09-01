@@ -78,7 +78,6 @@ export function initConfirmationSystem() {
 
   if (dialog) {
     dialog.addEventListener('cancel', (e) => {
-      e.preventDefault();
       handleDecision(false, 'User dismissed with Escape key');
     });
 
@@ -86,6 +85,7 @@ export function initConfirmationSystem() {
     dialog.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
         handleDecision(false, 'User pressed Escape key');
         return;
       }
@@ -95,19 +95,19 @@ export function initConfirmationSystem() {
           dialog.querySelectorAll(
             'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), summary'
           )
-        );
+        ).filter(el => el.offsetParent !== null);
         if (focusableElements.length === 0) return;
 
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
 
         if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
+          if (document.activeElement === firstElement || !dialog.contains(document.activeElement)) {
             e.preventDefault();
             lastElement.focus();
           }
         } else {
-          if (document.activeElement === lastElement) {
+          if (document.activeElement === lastElement || !dialog.contains(document.activeElement)) {
             e.preventDefault();
             firstElement.focus();
           }

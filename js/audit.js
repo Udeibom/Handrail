@@ -340,7 +340,7 @@ export function updateAuditLogUI() {
 
           <!-- Structured 5-Facet Accordion / Details -->
           <details class="audit-structured-details">
-            <summary class="audit-details-toggle">
+            <summary class="audit-details-toggle" aria-label="View 5-Point Structured Breakdown for audit entry ${entry.id}">
               <span>View 5-Point Structured Breakdown</span>
             </summary>
             
@@ -492,7 +492,7 @@ export function renderReceiptUI(entry = null) {
       <div class="receipt-card-header">
         <div>
           <span class="receipt-eyebrow">Action Outcome & Receipt</span>
-          <h4 class="receipt-title">${isSuccess ? 'Action Completed Successfully' : isBlocked ? 'Action Blocked by Handrail' : isDenied ? 'Authorization Denied by User' : 'Operation Processed'}</h4>
+          <h3 class="receipt-title">${isSuccess ? 'Action Completed Successfully' : isBlocked ? 'Action Blocked by Handrail' : isDenied ? 'Authorization Denied by User' : 'Operation Processed'}</h3>
         </div>
         <div class="receipt-header-badge">
           <span class="audit-decision-badge ${badgeMeta.className}">
