@@ -898,11 +898,48 @@ function bindDemoControls() {
   // Primary Demo Scenarios
   // =========================================================================
 
+  /**
+   * Shows a guidance hint after successful flow completion,
+   * pointing the user to explore other demo scenarios.
+   */
+  function showFlowGuidanceHint() {
+    const receiptSection = document.getElementById('receipt-section');
+    if (!receiptSection) return;
+
+    // Remove any existing hint first
+    const existingHint = document.querySelector('.flow-guidance-hint');
+    if (existingHint) existingHint.remove();
+
+    const hint = document.createElement('div');
+    hint.className = 'flow-guidance-hint';
+    hint.setAttribute('role', 'note');
+    hint.innerHTML = '<span>Try the security trap scenario in the right column</span><span class="hint-arrow" aria-hidden="true">→</span>';
+
+    receiptSection.appendChild(hint);
+
+    // Auto-remove after 15 seconds
+    setTimeout(() => {
+      hint.style.transition = 'opacity 0.5s ease-out';
+      hint.style.opacity = '0';
+      setTimeout(() => hint.remove(), 500);
+    }, 15000);
+  }
+
   // 1. Run Successful Agent Flow (Canonical 4-Step Sequence)
   const btnRunSuccessful = document.getElementById('sim-run-successful-flow');
   if (btnRunSuccessful) {
     btnRunSuccessful.addEventListener('click', async () => {
       if (state.isAgentBusy) return;
+
+      // Helper: delay with panel flash
+      const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+      const flashPanel = (selector) => {
+        const el = document.querySelector(selector);
+        if (el) {
+          el.classList.add('panel-flash');
+          setTimeout(() => el.classList.remove('panel-flash'), 850);
+        }
+      };
 
       // 1a. Ensure Authority Contract matches required demo parameters:
       // Lisinopril authorized, prepare & submit allowed, max spend $30.00
@@ -929,6 +966,8 @@ function bindDemoControls() {
       const searchRes = await executeHandrailTool('search_medications', { status: 'all' }, state.activeContract);
       renderPrescriptionList();
       renderTrustPanel();
+      flashPanel('#prescriptions-section');
+      await delay(500);
 
       if (!searchRes.success) {
         if (agentStatusEl) {
@@ -948,6 +987,8 @@ function bindDemoControls() {
       const detailsRes = await executeHandrailTool('view_prescription_details', { prescriptionId: 'RX-001' }, state.activeContract);
       renderPrescriptionDetails('RX-001');
       renderTrustPanel();
+      flashPanel('#prescriptions-section');
+      await delay(500);
 
       if (!detailsRes.success) {
         if (agentStatusEl) {
@@ -967,6 +1008,8 @@ function bindDemoControls() {
       const prepareRes = await executeHandrailTool('prepare_refill', { prescriptionId: 'RX-001', quantity: 30, deliveryMethod: 'pickup' }, state.activeContract);
       renderRefillPreparation();
       renderTrustPanel();
+      flashPanel('#refill-prep-section');
+      await delay(500);
 
       if (!prepareRes.success) {
         if (agentStatusEl) {
@@ -989,6 +1032,26 @@ function bindDemoControls() {
       renderRefillPreparation();
       renderReceiptUI();
       renderTrustPanel();
+
+      // Flash the prescription row to show refill count change
+      if (submitRes.success) {
+        const rxRow = document.querySelector('[data-rx-id="RX-001"]');
+        if (rxRow) {
+          rxRow.classList.add('row-flash-success');
+          setTimeout(() => rxRow.classList.remove('row-flash-success'), 1250);
+        }
+        // Update recent action status text with explicit refill change
+        if (recentActionEl) {
+          recentActionEl.innerHTML = '<strong>Lisinopril refills decremented from 2 to 1.</strong> Refill order confirmed and processed.';
+        }
+        // Auto-scroll to audit trail
+        const auditSection = document.getElementById('audit-section');
+        if (auditSection) {
+          setTimeout(() => auditSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+        }
+        // Show guidance hint
+        showFlowGuidanceHint();
+      }
 
       if (agentStatusEl) {
         if (submitRes.success) {

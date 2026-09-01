@@ -243,7 +243,150 @@
 
       <!-- Side Column: Handrail Governance, Trust, & Agent Simulation -->
       <aside class="side-column" aria-label="Handrail Agent Governance and Simulation Controls">
-        
+
+        <!-- DEMO SCENARIOS Panel -->
+        <section class="panel-card demo-primary-panel" aria-labelledby="agent-controls-heading" id="agent-demo-section">
+          <div class="panel-header">
+            <div>
+              <div class="demo-banner-badge">Interactive Demos</div>
+              <h2 id="agent-controls-heading" class="panel-heading">Demo Scenarios</h2>
+              <p class="panel-subtitle">Interactive WebMCP agent scenarios with <strong>NO consent bypass</strong>.</p>
+            </div>
+          </div>
+
+          <div class="simulation-actions-list">
+            <!-- Primary Demo Scenarios Group -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Primary Demo Scenarios</span>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-full demo-flow-btn demo-primary-btn" id="sim-run-successful-flow" aria-label="Run Full Successful Agent Flow: Search to Details to Prepare to Submit">
+              <span class="btn-icon">▶</span>
+              <div class="btn-text-block">
+                <strong>Run Successful Agent Flow</strong>
+                <span class="btn-subtext">Search → Details → Prepare ($12.40) → Human Confirmation → Refill</span>
+              </div>
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="Test Out-of-Scope Medication Refill Attempt">
+               <span class="btn-icon">⛔</span>
+               <div class="btn-text-block">
+                 <strong>Test: Out-of-Scope Medication</strong>
+                <span class="btn-subtext">Attempt submit_refill(RX-002) with Lisinopril-only authority → Blocked</span>
+               </div>
+             </button>
+
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="Test Amount Limit Exceeded Refill Attempt">
+               <span class="btn-icon">⛔</span>
+               <div class="btn-text-block">
+                 <strong>Test: Amount Limit Failure</strong>
+                <span class="btn-subtext">Set max spend $10.00, attempt $12.40 Lisinopril refill → Blocked</span>
+               </div>
+             </button>
+
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="Test Prepare-Only Restriction Refill Attempt">
+               <span class="btn-icon">⚠️</span>
+               <div class="btn-text-block">
+                 <strong>Test: Prepare-Only Restriction</strong>
+                 <span class="btn-subtext">Prepare allowed → submit_refill defaults to safe with NO confirmation</span>
+               </div>
+             </button>
+
+             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="Test Suspicious Delegation Trap Tool Call">
+               <span class="btn-icon">🛡️</span>
+               <div class="btn-text-block">
+                 <strong>Test: Suspicious Delegation Trap</strong>
+                 <span class="btn-subtext">Call update_payment_method → Gate 1 Trust check defaults to safe</span>
+               </div>
+             </button>
+
+            <!-- Individual Canonical Step Controls -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Individual Tool Step Simulator</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-search-medications">
+              1. search_medications (Read-Only Search)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-view-details-lisinopril">
+              2. view_prescription_details (RX-001 Lisinopril 10mg)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-view-details-metformin">
+              3. view_prescription_details (RX-003 Metformin 500mg)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-stage-lisinopril">
+              4. prepare_refill (Stage Lisinopril $12.40)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-stage-atorvastatin">
+              5. prepare_refill (Stage Atorvastatin $18.75)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-submit-authorized">
+              6. submit_refill (Submit Staged Refill)
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-full" id="sim-submit-ineligible">
+              7. submit_refill (Metformin - 0 Refills Ineligible)
+            </button>
+
+            <!-- Security Trap & Mid-Session Trust Demos -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Delegation Trap &amp; Mid-Session Trust Tests</span>
+            </div>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Test unexpected tool registration during active session">
+               Test Unexpected Mid-Session Registration
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Test calling update_payment_method trap tool">
+               Test: update_payment_method (Direct Call)
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Test calling typosquatted tool submit-refill">
+               Test: Typosquat Separator (Submit-refill)
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Test calling typosquatted tool submit_refil">
+               Test: Typosquat Edit Distance (submit_refil)
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Test calling suffix squatted tool submit_refill_v2">
+               Test: Suffix Squatting (submit_refill_v2)
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Test registering a tool with prompt injection description">
+               Test: Injected Description (fast_refill_helper)
+            </button>
+
+             <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Test invoking an unknown unmarked tool">
+               Test: Unknown Unregistered Tool
+            </button>
+
+            <!-- Developer Panel Utilities -->
+            <div class="simulation-group-header">
+              <span class="group-title-badge">Developer Utilities</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary btn-full" id="dev-view-raw-audit-btn" aria-label="View raw structured audit events in JSON viewer">
+                📋 View Raw Audit Events (JSON)
+              </button>
+
+              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-demo-full" aria-label="Reset entire demo state to baseline">
+                ↺ Reset Full Demo State (Contract, Pharmacy, Tools)
+              </button>
+
+              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-registry" aria-label="Reset WebMCP tool registry to baseline">
+                ↺ Reset Tool Registry Only (5 Expected)
+              </button>
+            </div>
+          </div>
+        </section>
+
         <!-- AGENT ACTIVITY Panel -->
         <section class="panel-card" aria-labelledby="agent-activity-heading" id="agent-activity-section">
           <div class="panel-header">
@@ -466,149 +609,6 @@
             <span class="field-label">Contract SHA-256 Fingerprint:</span>
             <div class="fingerprint-display" id="contract-fingerprint" aria-label="Cryptographic Fingerprint of Active Contract">
               Computing hash...
-            </div>
-          </div>
-        </section>
-
-        <!-- DEVELOPER / DEMO CONTROLS Panel -->
-        <section class="panel-card" aria-labelledby="agent-controls-heading" id="agent-demo-section">
-          <div class="panel-header">
-            <div>
-              <div class="dev-banner-badge">Developer / Demo Mode</div>
-              <h2 id="agent-controls-heading" class="panel-heading">DEVELOPER / DEMO CONTROLS</h2>
-              <p class="panel-subtitle">Interactive WebMCP agent scenarios with <strong>NO consent bypass</strong>.</p>
-            </div>
-          </div>
-
-          <div class="simulation-actions-list">
-            <!-- Primary Demo Scenarios Group -->
-            <div class="simulation-group-header">
-              <span class="group-title-badge">Primary Demo Scenarios</span>
-            </div>
-
-            <button type="button" class="btn btn-primary btn-full demo-flow-btn" id="sim-run-successful-flow" aria-label="Run Full Successful Agent Flow: Search to Details to Prepare to Submit">
-              <span class="btn-icon">▶</span>
-              <div class="btn-text-block">
-                <strong>Run Successful Agent Flow</strong>
-                <span class="btn-subtext">Search → Details → Prepare ($12.40) → Human Confirmation → Refill</span>
-              </div>
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-out-of-scope-flow" aria-label="Test Out-of-Scope Medication Refill Attempt">
-               <span class="btn-icon">⛔</span>
-               <div class="btn-text-block">
-                 <strong>Test: Out-of-Scope Medication</strong>
-                <span class="btn-subtext">Attempt submit_refill(RX-002) with Lisinopril-only authority → Blocked</span>
-              </div>
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-amount-limit-flow" aria-label="Test Amount Limit Exceeded Refill Attempt">
-               <span class="btn-icon">⛔</span>
-               <div class="btn-text-block">
-                 <strong>Test: Amount Limit Failure</strong>
-                <span class="btn-subtext">Set max spend $10.00, attempt $12.40 Lisinopril refill → Blocked</span>
-              </div>
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-prepare-only-flow" aria-label="Test Prepare-Only Restriction Refill Attempt">
-               <span class="btn-icon">⚠️</span>
-               <div class="btn-text-block">
-                 <strong>Test: Prepare-Only Restriction</strong>
-                 <span class="btn-subtext">Prepare allowed → submit_refill defaults to safe with NO confirmation</span>
-              </div>
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full demo-flow-btn" id="sim-suspicious-trap-flow" aria-label="Test Suspicious Delegation Trap Tool Call">
-               <span class="btn-icon">🛡️</span>
-               <div class="btn-text-block">
-                 <strong>Test: Suspicious Delegation Trap</strong>
-                 <span class="btn-subtext">Call update_payment_method → Gate 1 Trust check defaults to safe</span>
-              </div>
-            </button>
-
-            <!-- Individual Canonical Step Controls -->
-            <div class="simulation-group-header">
-              <span class="group-title-badge">Individual Tool Step Simulator</span>
-            </div>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-search-medications">
-              1. search_medications (Read-Only Search)
-            </button>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-view-details-lisinopril">
-              2. view_prescription_details (RX-001 Lisinopril 10mg)
-            </button>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-view-details-metformin">
-              3. view_prescription_details (RX-003 Metformin 500mg)
-            </button>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-stage-lisinopril">
-              4. prepare_refill (Stage Lisinopril $12.40)
-            </button>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-stage-atorvastatin">
-              5. prepare_refill (Stage Atorvastatin $18.75)
-            </button>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-submit-authorized">
-              6. submit_refill (Submit Staged Refill)
-            </button>
-
-            <button type="button" class="btn btn-secondary btn-full" id="sim-submit-ineligible">
-              7. submit_refill (Metformin - 0 Refills Ineligible)
-            </button>
-
-            <!-- Security Trap & Mid-Session Trust Demos -->
-            <div class="simulation-group-header">
-              <span class="group-title-badge">Delegation Trap &amp; Mid-Session Trust Tests</span>
-            </div>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-unexpected-registration" aria-label="Test unexpected tool registration during active session">
-               Test Unexpected Mid-Session Registration
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-unauthorized-action" aria-label="Test calling update_payment_method trap tool">
-               Test: update_payment_method (Direct Call)
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-tool" aria-label="Test calling typosquatted tool submit-refill">
-               Test: Typosquat Separator (Submit-refill)
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-refil" aria-label="Test calling typosquatted tool submit_refil">
-               Test: Typosquat Edit Distance (submit_refil)
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-squatted-v2" aria-label="Test calling suffix squatted tool submit_refill_v2">
-               Test: Suffix Squatting (submit_refill_v2)
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-register-injected-tool" aria-label="Test registering a tool with prompt injection description">
-               Test: Injected Description (fast_refill_helper)
-            </button>
-
-             <button type="button" class="btn btn-danger btn-full" id="sim-call-unknown-tool" aria-label="Test invoking an unknown unmarked tool">
-               Test: Unknown Unregistered Tool
-            </button>
-
-            <!-- Developer Panel Utilities -->
-            <div class="simulation-group-header">
-              <span class="group-title-badge">Developer Utilities</span>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <button type="button" class="btn btn-secondary btn-full" id="dev-view-raw-audit-btn" aria-label="View raw structured audit events in JSON viewer">
-                📋 View Raw Audit Events (JSON)
-              </button>
-
-              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-demo-full" aria-label="Reset entire demo state to baseline">
-                ↺ Reset Full Demo State (Contract, Pharmacy, Tools)
-              </button>
-
-              <button type="button" class="btn btn-secondary btn-full" id="sim-reset-registry" aria-label="Reset WebMCP tool registry to baseline">
-                ↺ Reset Tool Registry Only (5 Expected)
-              </button>
             </div>
           </div>
         </section>

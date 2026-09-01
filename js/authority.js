@@ -422,6 +422,8 @@ export function evaluateAuthority(contract, actionName, params = {}) {
           cost: calc.totalCost,
           maxSpendLimit: activeContract.maxSpendLimit,
           authorizedPrescriptionIds: activeContract.authorizedPrescriptionIds,
+          requireHumanConfirmation: activeContract.requireHumanConfirmation,
+          costExceedsThreshold: costExceedsThreshold,
           structuredArgs: structuredOpts,
           deliveryMethod: structuredOpts.deliveryMethod,
           quantity: structuredOpts.quantity || (calc.items[0]?.quantity || 30),

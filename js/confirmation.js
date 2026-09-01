@@ -63,14 +63,6 @@ export function initConfirmationSystem() {
     }
 
     // Placeholder for real baseline comparison (to be supplied after user testing)
-    const comparisonPlaceholder = document.createElement('span');
-    comparisonPlaceholder.id = 'dialog-comparison-placeholder';
-    comparisonPlaceholder.setAttribute('aria-hidden', 'true');
-    comparisonPlaceholder.style.cssText = 'display:inline-block;margin-left:8px;font-family:monospace;font-size:0.75rem;color:var(--color-text-muted, #64748b);vertical-align:middle;';
-    comparisonPlaceholder.textContent = ' [REAL_COMPARISON]';
-    if (stopwatchElement && stopwatchElement.parentNode) {
-      stopwatchElement.parentNode.insertBefore(comparisonPlaceholder, stopwatchElement.nextSibling);
-    }
   }
 
   const cancelBtn = document.getElementById('dialog-deny-btn');
@@ -215,8 +207,23 @@ export function requestHumanConfirmation(payload) {
     const medNamesText = items.map((i) => `${i.medication} ${i.dosage}`).join(', ') || 'Prescription item';
     const formattedCost = `$${Number(totalCost).toFixed(2)}`;
 
+    const requireConfirmFlag = details?.requireHumanConfirmation === true;
+    const exceedsThreshold = details?.costExceedsThreshold === true || (totalCost >= threshold);
+
+    // Build accurate explanation for why confirmation is required
+    let confirmationReasonText = '';
+    if (requireConfirmFlag && exceedsThreshold) {
+      confirmationReasonText = `Handrail policy requires human confirmation because this is a <strong>mutating pharmacy transaction</strong> and the copay (${formattedCost}) meets or exceeds your consent threshold ($${Number(threshold).toFixed(2)}).`;
+    } else if (requireConfirmFlag) {
+      confirmationReasonText = `Handrail policy requires human confirmation because this is a <strong>mutating pharmacy transaction</strong> and your authority contract has <strong>require human confirmation</strong> enabled. The copay (${formattedCost}) is below your $${Number(threshold).toFixed(2)} threshold, but confirmation is still required by policy.`;
+    } else if (exceedsThreshold) {
+      confirmationReasonText = `Handrail policy requires human confirmation because the copay (${formattedCost}) meets or exceeds your consent threshold ($${Number(threshold).toFixed(2)}).`;
+    } else {
+      confirmationReasonText = `Handrail policy requires human confirmation for this <strong>mutating pharmacy transaction</strong>.`;
+    }
+
     if (titleEl) {
-      titleEl.textContent = `Confirm Prescription Refill: ${medNamesText}`;
+      titleEl.textContent = `Step 4: Confirm Prescription Refill — ${medNamesText}`;
     }
 
     if (descEl) {
@@ -261,45 +268,33 @@ export function requestHumanConfirmation(payload) {
             </p>
           </div>
 
-          <!-- 2. Which medication & 3. Declared arguments -->
+          <!-- 2. Medication -->
           <div class="confirmation-section-item" style="margin-bottom: 0.875rem;">
             <span class="field-label" style="display: block; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted);">
-              2. Medication &amp; Declared Order Parameters
+              2. Medication
             </span>
             <ul class="summary-list" aria-label="Requested Prescriptions" style="list-style: none; padding: 0; margin: 0.35rem 0 0.5rem 0;">
               ${medicationLines || `<li>${toolName}</li>`}
             </ul>
-            <div style="background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 10px; font-size: 0.8125rem; line-height: 1.5;">
-              <div>
-                <span style="color: var(--color-text-muted); font-weight: 600;">Fulfillment:</span>
-                <strong style="color: var(--color-text-main); margin-left: 4px;">${deliveryMethodLabel}</strong>
-              </div>
-              <div style="margin-top: 3px;">
-                <span style="color: var(--color-text-muted); font-weight: 600;">Authority Scope Check:</span>
-                <span style="color: var(--color-text-main); margin-left: 4px;">
-                  Within your authorized spend cap of <strong>$${Number(maxSpendLimit).toFixed(2)}</strong>.
-                </span>
-              </div>
-            </div>
           </div>
 
-          <!-- 4. Amount -->
+          <!-- 3. Amount -->
           <div class="summary-total-row" style="display: flex; justify-content: space-between; align-items: baseline; margin: 0.875rem 0; padding: 8px 0; border-top: 2px solid var(--color-border); border-bottom: 2px solid var(--color-border);">
-            <span class="total-label" style="font-weight: 700; color: var(--color-text-main);">4. Total Estimated Copay Amount:</span>
+            <span class="total-label" style="font-weight: 700; color: var(--color-text-main);">3. Total Estimated Copay Amount:</span>
             <strong class="total-amount" style="font-size: 1.25rem; color: var(--color-text-main); font-family: monospace;">${formattedCost}</strong>
           </div>
 
-          <!-- 5. Why confirmation is required -->
+          <!-- 4. Why confirmation is required -->
           <div class="confirmation-section-item" style="margin-bottom: 0.875rem; background: var(--color-warning-bg); border: 1px solid var(--color-warning-border); padding: 10px; border-radius: var(--radius-sm);">
             <span class="field-label" style="display: block; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--color-warning);">
-              5. Why Confirmation Is Required
+              4. Why Confirmation Is Required
             </span>
             <p style="font-size: 0.875rem; color: var(--color-text-main); margin-top: 2px; line-height: 1.4;">
-              Handrail policy requires human confirmation because this is a <strong>mutating pharmacy transaction</strong> and the copay (${formattedCost}) meets or exceeds your consent threshold ($${Number(threshold).toFixed(2)}).
+              ${confirmationReasonText}
             </p>
           </div>
 
-          <!-- 6. What approving means & 7. What denying means -->
+          <!-- 5. What approving/denying means -->
           <div class="confirmation-section-item" style="margin-bottom: 0.875rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
             <div style="background: var(--color-success-bg); border: 1px solid var(--color-success-border); padding: 10px; border-radius: var(--radius-sm);">
               <strong style="font-size: 0.8125rem; color: var(--color-success); display: block; margin-bottom: 2px;">
@@ -319,16 +314,34 @@ export function requestHumanConfirmation(payload) {
             </div>
           </div>
 
-          <!-- Auditable Schema Representation directly from WebMCP tool arguments -->
-          <details style="background: #0f172a; color: #f8fafc; border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.75rem; font-family: monospace; margin-top: 8px;">
-            <summary style="cursor: pointer; color: #94a3b8; font-weight: 600;">
-              Auditable Structured Parameters (Declared Tool &amp; Schema Arguments)
+          <!-- Collapsible Details section -->
+          <details class="dialog-details-section" style="margin-top: 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden;">
+            <summary style="cursor: pointer; padding: 10px 12px; font-weight: 600; font-size: 0.8125rem; color: var(--color-text-main); background: var(--color-surface-subtle);">
+              Details
             </summary>
-            <pre style="margin: 8px 0 0 0; white-space: pre-wrap; font-family: monospace; font-size: 0.75rem; color: #38bdf8;">Tool:
+            <div style="padding: 12px; font-size: 0.8125rem; line-height: 1.5;">
+              <!-- Fulfillment & Authority -->
+              <div style="margin-bottom: 0.75rem;">
+                <span style="color: var(--color-text-muted); font-weight: 600;">Fulfillment:</span>
+                <strong style="color: var(--color-text-main); margin-left: 4px;">${deliveryMethodLabel}</strong>
+              </div>
+              <div style="margin-bottom: 0.75rem;">
+                <span style="color: var(--color-text-muted); font-weight: 600;">Authority Scope Check:</span>
+                <span style="color: var(--color-text-main); margin-left: 4px;">
+                  Within your authorized spend cap of <strong>$${Number(maxSpendLimit).toFixed(2)}</strong>.
+                </span>
+              </div>
+
+              <!-- Auditable Schema Representation -->
+              <div style="background: #0f172a; color: #f8fafc; border-radius: var(--radius-sm); padding: 10px; font-family: monospace; font-size: 0.75rem;">
+                <div style="color: #94a3b8; font-weight: 600; margin-bottom: 6px;">Auditable Structured Parameters</div>
+                <pre style="margin: 0; white-space: pre-wrap; font-family: monospace; font-size: 0.75rem; color: #38bdf8;">Tool:
 ${toolName}
 
 Arguments:
 ${rawArgumentsFormatted}</pre>
+              </div>
+            </div>
           </details>
         </div>
       `;
