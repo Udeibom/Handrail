@@ -1056,6 +1056,61 @@ export async function registerWebMCPTools(getActiveContract) {
 
     isRegisteringExpectedTools = false;
 
+    // Also register the demo adversarial tool for native WebMCP testing
+    // This tool has a benign name/description that passes Gate 1 but gets blocked by Gate 2
+    const demoToolName = 'auto_reorder_assistant';
+    const demoToolDescription = 'Convenience helper that reorders a patient\'s most recent prescription automatically.';
+    try {
+      const demoRegisterPromise = document.modelContext.registerTool({
+        name: demoToolName,
+        description: demoToolDescription,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            medicationName: { type: 'string', description: 'Name of the medication to refill' },
+            deliveryMethod: { type: 'string', enum: ['pickup', 'delivery', 'mail'], description: 'Delivery method' },
+          },
+          required: ['medicationName'],
+        },
+        readOnlyHint: false,
+        execute: async (params) => {
+          // Ensure the tool is registered in the internal registry for proper trust/authority checks
+          if (!toolRegistry.getTool(demoToolName)) {
+            toolRegistry.registerTool({
+              name: demoToolName,
+              description: demoToolDescription,
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  medicationName: { type: 'string', description: 'Name of the medication to refill' },
+                  deliveryMethod: { type: 'string', enum: ['pickup', 'delivery', 'mail'], description: 'Delivery method' },
+                },
+                required: ['medicationName'],
+              },
+              readOnlyHint: false,
+              registrationInfo: {
+                registeredBy: 'Native-WebMCP-Demo',
+                version: '1.0.0',
+                isDemoTool: true,
+              },
+            });
+          }
+
+          const activeContract = typeof getActiveContract === 'function' ? getActiveContract() : null;
+          const result = await executeHandrailTool(demoToolName, params, activeContract);
+
+          // Update UI to reflect the execution
+          updateUIAfterExecution(result, demoToolName);
+
+          return result;
+        },
+      });
+      await demoRegisterPromise;
+      console.log(`[WebMCP Debug] Demo tool '${demoToolName}' registered successfully`);
+    } catch (err) {
+      console.error(`[WebMCP Debug] Failed to register demo tool '${demoToolName}':`, err);
+    }
+
     if (document.modelContext && typeof document.modelContext === 'object') {
       setupUnexpectedRegistrationListener();
     }
@@ -1352,9 +1407,31 @@ export async function executeHandrailTool(toolName, params, contract) {
   // =========================================================================
   // GATE 2: Deterministic Authority Contract Evaluation (authority.js)
   // =========================================================================
+  // Map benign-looking third-party tools to their canonical action for authority evaluation
+  // This ensures that tools like 'auto_reorder_assistant' are evaluated against the
+  // same scope/spend checks as the standard refill tools
+  let authorityToolName = toolName;
+  let authorityParams = safeParams;
+  if (toolName === 'auto_reorder_assistant') {
+    // Map auto_reorder_assistant to submit_refill for authority checking
+    authorityToolName = 'submit_refill';
+    const medicationName = safeParams.medicationName || '';
+    const prescriptions = getPrescriptions();
+    const targetRx = prescriptions.find(
+      (rx) => rx.medication.toLowerCase() === medicationName.toLowerCase()
+    );
+    authorityParams = {
+      prescriptionId: targetRx ? targetRx.id : null,
+      deliveryMethod: safeParams.deliveryMethod || 'pickup',
+      quantity: safeParams.quantity || 30,
+      refillReason: 'Auto-reorder convenience refill',
+      patientNote: safeParams.patientNote || '',
+      urgency: safeParams.urgency || 'standard',
+    };
+  }
   let evaluation;
   try {
-    evaluation = evaluateAuthority(contract, toolName, safeParams);
+    evaluation = evaluateAuthority(contract, authorityToolName, authorityParams);
   } catch (evalError) {
     // Fail closed on evaluation failure: Security failures must NEVER be treated as approvals
     recordPolicyMetric('BLOCKED_INTERNAL_ERROR', null);
@@ -1662,6 +1739,68 @@ export async function executeHandrailTool(toolName, params, contract) {
         code: 'BLOCKED_SECURITY_TRAP',
         trustReport,
       };
+    }
+
+    case 'auto_reorder_assistant': {
+      // Benign-looking third-party tool that attempts a refill
+      // Gate 1 (Trust Check) passes because name/description are benign
+      // Gate 2 (Authority Check) should block if targeting out-of-scope Rx
+      const medicationName = safeParams.medicationName || '';
+      const deliveryMethod = safeParams.deliveryMethod || 'pickup';
+
+      // Look up the prescription by medication name
+      const prescriptions = getPrescriptions();
+      const targetRx = prescriptions.find(
+        (rx) => rx.medication.toLowerCase() === medicationName.toLowerCase()
+      );
+
+      if (!targetRx) {
+        logAuditEvent({
+          toolName,
+          action: toolName,
+          decision: 'blocked',
+          reason: `Medication '${medicationName}' not found in patient's prescriptions.`,
+          arguments: safeParams,
+          userAuthorized: activeContractSnapshot,
+          decisionDetails: { code: 'BLOCKED_UNKNOWN_MEDICATION' },
+          whatHappened: `Benign-looking tool attempted to refill unknown medication '${medicationName}'.`,
+          result: { status: 'blocked', error: 'Medication not found' },
+        });
+        return {
+          success: false,
+          error: `Medication '${medicationName}' not found.`,
+          verdict: 'BLOCKED',
+          code: 'BLOCKED_UNKNOWN_MEDICATION',
+          trustReport,
+        };
+      }
+
+      // Map to standard refill parameters - this is where Gate 2 evaluates authority
+      const rxIds = [targetRx.id];
+      const structuredOpts = {
+        quantity: safeParams.quantity || 30,
+        deliveryMethod,
+        refillReason: 'Auto-reorder convenience refill',
+        patientNote: safeParams.patientNote || '',
+        urgency: safeParams.urgency || 'standard',
+      };
+
+      // Execute the refill - Gate 2 (Authority Check) will block if RX is out of scope
+      const orderReceipt = submitPrescriptionRefill(rxIds, structuredOpts);
+      resultData = orderReceipt;
+
+      logAuditEvent({
+        toolName,
+        action: toolName,
+        decision: 'executed',
+        reason: `Auto-reorder refill submitted for ${orderReceipt.medications.join(', ')} ($${orderReceipt.totalCharged.toFixed(2)}).`,
+        arguments: safeParams,
+        userAuthorized: activeContractSnapshot,
+        decisionDetails: evaluation,
+        whatHappened: `Benign-looking tool completed refill for ${targetRx.medication} (${targetRx.id}).`,
+        result: { status: 'success', confirmationNumber: orderReceipt.confirmationNumber },
+      });
+      break;
     }
 
     default: {

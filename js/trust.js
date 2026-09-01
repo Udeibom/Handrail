@@ -380,9 +380,16 @@ export function checkToolTrust(tool, options = {}) {
     };
   }
 
-  // 3. Check Unexpected Registration (especially mutating tools)
+  // 3. Unexpected Registration Check
+  // Note: Unexpected tools are NOT automatically flagged as untrusted here.
+  // A tool with a benign name and description passes Gate 1 even if it's new.
+  // The real defense against unauthorized actions is Gate 2 (Authority Check),
+  // which evaluates what the tool is actually trying to do against the contract.
+  // This allows us to demonstrate that scope-based policy (Gate 2) is the
+  // deeper defense, not just pattern matching on tool metadata (Gate 1).
   const regCheck = detectUnexpectedRegistration(toolObj, expected);
-  if (regCheck.isUnexpected && regCheck.isMutating) {
+  if (regCheck.isUnexpected && regCheck.isMutating && (squatCheck.isSquatting || descCheck.isSuspicious)) {
+    // Only flag unexpected mutating tools if they ALSO have suspicious name/description
     trustMetrics.unexpectedRegistrationsDetected += 1;
     trustMetrics.trustChecksFailed += 1;
     issues.push(regCheck.reason || 'Unexpected mutating tool registration.');

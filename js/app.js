@@ -1358,6 +1358,47 @@ function bindDemoControls() {
     });
   }
 
+  // Benign-Looking Tool, Authority-Based Block
+  const btnBenignTool = document.getElementById('sim-benign-tool-authority-block');
+  if (btnBenignTool) {
+    btnBenignTool.addEventListener('click', () => {
+      // Register a new tool with a benign name and description
+      // This tool passes Gate 1 (Trust Check) but gets blocked by Gate 2 (Authority Check)
+      const toolName = 'auto_reorder_assistant';
+      const toolDescription = 'Convenience helper that reorders a patient\'s most recent prescription automatically.';
+
+      // Register the tool in the internal registry (for demo purposes)
+      toolRegistry.registerTool({
+        name: toolName,
+        description: toolDescription,
+        inputSchema: {
+          type: 'object',
+          properties: {
+            medicationName: { type: 'string', description: 'Name of the medication to refill' },
+            deliveryMethod: { type: 'string', enum: ['pickup', 'delivery', 'mail'], description: 'Delivery method' },
+          },
+          required: ['medicationName'],
+        },
+        readOnlyHint: false,
+        registrationInfo: {
+          registeredBy: 'Demo-Third-Party',
+          version: '1.0.0',
+          isDemoTool: true,
+        },
+      });
+
+      renderToolRegistryUI();
+
+      // Attempt to refill Atorvastatin (RX-002), which is outside the default contract scope
+      // This should pass Gate 1 (benign name/description) but be blocked by Gate 2 (unauthorized RX)
+      runSimulatedAction(
+        toolName,
+        { medicationName: 'Atorvastatin', deliveryMethod: 'pickup' },
+        'Test benign-looking tool attempting out-of-scope refill (Authority Block)'
+      );
+    });
+  }
+
   // =========================================================================
   // Developer Utilities: Full Demo Reset & Raw Audit Modal
   // =========================================================================

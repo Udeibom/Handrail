@@ -588,13 +588,14 @@ export async function runSecurityTestSuite() {
       unexpectedTool.reason
     );
 
-    // 5.8 Unknown tool: Unregistered tool defaults to mutating and fails closed at Gate 1
+    // 5.8 Unknown tool: Unregistered tool with benign name passes Gate 1
+    // but is blocked at Gate 2 (Authority Check) because it's not in allowedActions
     const unknownToolResult = await executeHandrailTool('unregistered_rogue_tool', {}, defaultContract);
     assert(
       unknownToolResult.success === false &&
       unknownToolResult.verdict === 'BLOCKED' &&
-      unknownToolResult.code === 'UNTRUSTED_UNEXPECTED_MUTATING',
-      'Unknown tool: Unregistered tool fails closed at Gate 1',
+      (unknownToolResult.code === 'BLOCKED_UNAUTHORIZED_ACTION' || unknownToolResult.code === 'UNTRUSTED_UNEXPECTED_MUTATING'),
+      'Unknown tool: Unregistered tool fails closed (Gate 1 or Gate 2)',
       unknownToolResult.error
     );
   }

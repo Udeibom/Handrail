@@ -938,6 +938,8 @@ export async function runAllAuthorityTests() {
   );
 
   // 17g. Unknown Unregistered Mutating Tool
+  // Note: With the updated trust check, benign-named unknown tools pass Gate 1
+  // but are blocked at Gate 2 (Authority Check) because they're not in allowedActions
   const unknownToolExec = await executeHandrailTool(
     'unregistered_rogue_tool',
     { action: 'wipe_records' },
@@ -946,8 +948,8 @@ export async function runAllAuthorityTests() {
   assert(
     unknownToolExec.success === false &&
     unknownToolExec.verdict === 'BLOCKED' &&
-    unknownToolExec.code === 'UNTRUSTED_UNEXPECTED_MUTATING',
-    'Trust Safety: Unknown Unregistered Tool Fails Closed at Gate 1',
+    (unknownToolExec.code === 'BLOCKED_UNAUTHORIZED_ACTION' || unknownToolExec.code === 'UNTRUSTED_UNEXPECTED_MUTATING'),
+    'Trust Safety: Unknown Unregistered Tool Fails Closed (Gate 1 or Gate 2)',
     unknownToolExec.error
   );
 
