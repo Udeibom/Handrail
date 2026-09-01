@@ -1028,7 +1028,7 @@ export async function registerWebMCPTools(getActiveContract) {
           inputSchema: toolDef.inputSchema,
           parameters: toolDef.parameters,
           readOnlyHint: toolDef.readOnlyHint,
-          handler: async (params) => {
+          execute: async (params) => {
             const activeContract = typeof getActiveContract === 'function' ? getActiveContract() : null;
             return executeHandrailTool(toolDef.name, params, activeContract);
           },

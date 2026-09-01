@@ -340,7 +340,7 @@ export function updateAuditLogUI() {
 
           <!-- Structured 5-Facet Accordion / Details -->
           <details class="audit-structured-details">
-            <summary class="audit-details-toggle" aria-label="View 5-Point Structured Breakdown for audit entry ${entry.id}">
+            <summary class="audit-details-toggle" aria-label="View 5-Point Structured Breakdown for audit entry ${log.id}">
               <span>View 5-Point Structured Breakdown</span>
             </summary>
             
