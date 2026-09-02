@@ -15,7 +15,7 @@ Handrail fills exactly this gap. It uses WebMCP's `registerTool()` API to regist
 **For people (especially screen-reader and keyboard-only users):**
 - Confirmation dialogs use native `<dialog role="alertdialog">` with strict focus trapping, `aria-live` announcements, and defaults-to-safe Escape handling
 - Status indicators combine text tags, structural badges, and symbols — never color alone
-- Response time is measured and displayed: real user testing showed confirmation decisions made in under 2 seconds on average, with zero state mutation during the confirmation window
+- Response time is measured and displayed: informal self-testing (n=5 runs, not a rigorous study or screen-reader-specific test) showed confirmation decisions made in approximately 22 seconds on average. This reflects a deliberate, unhurried decision window -- the point of human-in-the-loop consent is that the user takes time to review, not that they rubber-stamp instantly. Zero state mutation occurs during the confirmation window regardless of timing.
 - All interactive elements are keyboard-reachable with visible focus rings
 
 **For agents:**
@@ -25,7 +25,7 @@ Handrail fills exactly this gap. It uses WebMCP's `registerTool()` API to regist
 
 ## What becomes possible now
 
-1. **Measurable accessibility consent**: The confirmation dialog includes a stopwatch that starts when the dialog opens and stops on approval/denial. This produces a concrete `responseTimeSeconds` number. In testing, screen-reader users made confirmation decisions in an average of 1.8 seconds. This number was previously difficult to capture because there was no structured way to time the interval between dialog open and user decision.
+1. **Measurable accessibility consent**: The confirmation dialog includes a stopwatch that starts when the dialog opens and stops on approval/denial. This produces a concrete `responseTimeSeconds` number. In informal self-testing (n=5 runs, not a rigorous study or screen-reader-specific test), users took approximately 22 seconds on average to review and make a decision. This number was previously difficult to capture because there was no structured way to time the interval between dialog open and user decision. The ~22-second average reflects a deliberate, review-oriented interaction -- the user reads the details, considers the action, and then decides -- which is exactly what human-in-the-loop consent is designed to enable.
 
 2. **Deterministic authority contracts**: A user can specify exact medications, action scopes, and spending limits that are evaluated mathematically against tool arguments. Previously, this required either trusting the agent or manually monitoring every action.
 

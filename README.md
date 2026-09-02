@@ -6,7 +6,7 @@
 
 ## Overview
 
-**Handrail** is an open-source human-control layer for web-based autonomous AI agents. It has zero runtime dependencies — no React, no Angular, no frontend framework. The entire application is vanilla HTML, CSS, and JavaScript ES modules. Build tooling (Vite, TypeScript) is used only for development and production bundling.
+**Handrail** is an open-source human-control layer for web-based autonomous AI agents. It has zero runtime dependencies — no React, no Angular, no frontend framework. The entire application is vanilla HTML, CSS, and JavaScript ES modules.
 
 As AI agents gain the ability to interact directly with web applications via **WebMCP** (Web Model Context Protocol — a browser standard exposing `document.modelContext` for structured tool invocation), users—especially those who rely on screen readers and keyboard navigation—require transparent, reliable, and accessible safeguards against unintended, out-of-scope, or malicious tool invocations.
 
@@ -186,12 +186,12 @@ node tests/authority-tests.js
 
 ### Manual Interactive Test Scenarios
 
-You can verify all security flows directly in the UI using the **DEVELOPER / DEMO CONTROLS** panel:
+You can verify all security flows directly in the UI using the **Demo Scenarios** panel:
 
 1. **Successful Flow (Lisinopril $12.40)**:
     - Click **"Run Successful Agent Flow"**.
     - Agent stages Lisinopril, passes Gate 1 & Gate 2, triggers Gate 3 confirmation dialog.
-    - Click **"Authorize & Submit Refill"** &rarr; Order is executed, refills decremented, audit receipt rendered.
+    - Click **"Approve refill"** &rarr; Order is executed, refills decremented, audit receipt rendered.
 2. **Out-of-Scope Flow (Atorvastatin $18.75)**:
     - With contract set only to Lisinopril (`RX-001`), click **"Test: Out-of-Scope Medication"**.
     - Agent attempts to refill Atorvastatin (`RX-002`) &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_RX`). **No confirmation modal opens.**
@@ -204,27 +204,20 @@ You can verify all security flows directly in the UI using the **DEVELOPER / DEM
 5. **Delegation Trap Flow**:
     - Click **"Test: Suspicious Delegation Trap"**.
     - Agent calls `update_payment_method` &rarr; Blocked at Gate 1 (`UNTRUSTED_INSTRUCTION_DESCRIPTION`). **No confirmation modal opens.**
+6. **Benign-Looking Tool, Authority-Based Block Flow**:
+    - Click **"Test: Benign-Looking Tool, Authority-Based Block"**.
+    - Registers a new tool called `auto_reorder_assistant` with a plain description ("Convenience helper that reorders a patient's most recent prescription automatically").
+    - This tool passes Gate 1 (Trust Check) because its name and description contain no suspicious patterns &rarr; Verdict: **TRUSTED**.
+    - The tool then attempts to refill Atorvastatin (`RX-002`), which is outside the default contract scope &rarr; Blocked at Gate 2 (`BLOCKED_UNAUTHORIZED_RX`). **No confirmation modal opens.**
+    - **Why this matters**: A real attacker wouldn't announce itself with a suspicious description like the `update_payment_method` trap. This scenario demonstrates that scope-based policy (Gate 2) is the deeper defense &rarr; even a completely benign-looking tool gets blocked when it tries to act outside the authority contract.
 
 ---
 
 ## Local Development
 
-Handrail is built with static HTML, CSS, and modern JavaScript modules. Vite is used as a dev server and bundler for production builds.
+Handrail is built with static HTML, CSS, and modern JavaScript modules. No build step is required.
 
 ### Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Start dev server (http://localhost:3000)
-npm run dev
-
-# Build for production
-npm run build
-```
-
-### Serving with any static HTTP server:
 
 ```bash
 # Using Node npx serve:
@@ -232,12 +225,9 @@ npx serve .
 
 # Or using Python 3:
 python3 -m http.server 8000
-
-# Or using Vite preview:
-npm run preview
 ```
 
-Open `http://localhost:3000` (or the port indicated by your static server) in your browser.
+Open `http://localhost:8000` (or the port indicated by your static server) in your browser.
 
 ### Console Testing (Browser DevTools)
 
@@ -265,15 +255,19 @@ handrail/
 ├── netlify.toml            # Static deployment config
 ├── js/
 │   ├── app.js              # UI controller, rendering, event binding
-│   ├── authority.js        # Authority Contract creation & evaluation (Gate 2)
-│   ├── audit.js            # Structured audit logging & receipt rendering
-│   ├── confirmation.js     # Accessible confirmation dialog (Gate 3)
-│   ├── pharmacy-data.js    # Mock pharmacy data & business logic
-│   ├── tools.js            # WebMCP tool registry & execution pipeline
-│   └── trust.js            # Tool-trust heuristics (Gate 1)
-├── tests/
-│   ├── security-suite.js   # 39 assertions: trust, authority, consent, defaults-to-safe
-│   └── authority-tests.js  # 104 authority & policy assertions
+ │   ├── authority.js        # Authority Contract creation & evaluation (Gate 2)
+ │   ├── audit.js            # Structured audit logging & receipt rendering
+ │   ├── audit-db.js         # IndexedDB persistence for audit entries
+ │   ├── confirmation.js     # Accessible confirmation dialog (Gate 3)
+ │   ├── execution-callback.js # Callback registry for native WebMCP UI updates
+ │   ├── pharmacy-data.js    # Mock pharmacy data & business logic
+ │   ├── tools.js            # WebMCP tool registry & execution pipeline
+ │   ├── trust.js            # Tool-trust heuristics (Gate 1)
+ │   ├── ui-update.js        # Shared UI update functions
+ │   └── ...
+ ├── tests/
+ │   ├── security-suite.js   # 39 assertions: trust, authority, consent, defaults-to-safe
+ │   └── authority-tests.js  # 104 authority & policy assertions
 ```
 
 ---
