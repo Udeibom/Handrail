@@ -348,6 +348,7 @@ export function checkToolTrust(tool, options = {}) {
 
   // 1. Check Tool-Name Squatting
   const squatCheck = detectNameSquatting(toolName, expected);
+  console.log(`[DEBUG] Trust check for '${toolName}': squatCheck=`, squatCheck);
   if (squatCheck.isSquatting) {
     trustMetrics.squattingDetections += 1;
     trustMetrics.trustChecksFailed += 1;

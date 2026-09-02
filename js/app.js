@@ -47,6 +47,7 @@ import {
   executeHandrailTool,
   callNativeTool,
   setupUnexpectedRegistrationListener,
+  simulateSuspiciousRegistration,
   WEBMCP_PRIMARY_TOOL_DEFINITIONS,
   WEBMCP_TOOL_DEFINITIONS,
 } from './tools.js';
@@ -781,7 +782,8 @@ async function renderWebMcpInfo() {
     if (avail.isAvailable && state.webMcpStatus.registeredCount > 0) {
       statusBadge.textContent = 'Native WebMCP Active';
       statusBadge.className = 'status-badge status-active';
-      statusDesc.innerHTML = `Registered <strong>${state.webMcpStatus.registeredCount} tools</strong> directly with <code>document.modelContext.registerTool</code>.`;
+      const nativeCount = nativeToolCount > 0 ? nativeToolCount : state.webMcpStatus.registeredCount;
+      statusDesc.innerHTML = `Registered <strong>${nativeCount} tools</strong> directly with <code>document.modelContext.registerTool</code>.`;
     } else if (avail.isAvailable) {
       statusBadge.textContent = 'WebMCP Available';
       statusBadge.className = 'status-badge status-harness';
@@ -1330,9 +1332,13 @@ function bindDemoControls() {
   const btnSquatted = document.getElementById('sim-call-squatted-tool');
   if (btnSquatted) {
     btnSquatted.addEventListener('click', () => {
+      console.log('[DEBUG] Typosquat Separator button clicked');
       simulateSuspiciousRegistration('typosquat_submit');
       renderToolRegistryUI();
-       runSimulatedAction('submit-refill', { prescriptionIds: ['RX-001'], deliveryMethod: 'pickup' }, 'Test invoking separator squatted tool (submit-refill)');
+      console.log('[DEBUG] About to call runSimulatedAction with submit-refill');
+      runSimulatedAction('submit-refill', { prescriptionIds: ['RX-001'], deliveryMethod: 'pickup' }, 'Test invoking separator squatted tool (submit-refill)')
+        .then(result => console.log('[DEBUG] runSimulatedAction result:', result))
+        .catch(err => console.log('[DEBUG] runSimulatedAction error:', err));
     });
   }
 
