@@ -738,13 +738,27 @@ export function renderToolRegistryUI() {
  * Renders WebMCP registration status info.
  */
 async function renderWebMcpInfo() {
-  const statusBadge = document.getElementById('webmcp-status-badge');
-  const statusDesc = document.getElementById('webmcp-status-desc');
+  try {
+    const statusBadge = document.getElementById('webmcp-status-badge');
+    const statusDesc = document.getElementById('webmcp-status-desc');
   const modelContextStatus = document.getElementById('webmcp-modelcontext-status');
   const registerToolStatus = document.getElementById('webmcp-registertool-status');
   const registeredCountEl = document.getElementById('webmcp-registered-count');
 
   const avail = checkWebMCPNativeAvailability();
+
+  // Fetch native tool count once, use in both badge and subtitle
+  let nativeToolCount = 0;
+  let nativeAvailable = false;
+  try {
+    if (document.modelContext && typeof document.modelContext.getTools === 'function') {
+      const nativeTools = await document.modelContext.getTools();
+      nativeToolCount = nativeTools.length;
+      nativeAvailable = true;
+    }
+  } catch (_e) {
+    // getTools() not available or failed
+  }
 
   if (modelContextStatus) {
     modelContextStatus.textContent = avail.hasModelContext ? 'Detected (document.modelContext)' : 'Unavailable';
@@ -757,18 +771,6 @@ async function renderWebMcpInfo() {
   }
 
   if (registeredCountEl) {
-    let nativeToolCount = 0;
-    let nativeAvailable = false;
-    try {
-      if (document.modelContext && typeof document.modelContext.getTools === 'function') {
-        const nativeTools = await document.modelContext.getTools();
-        nativeToolCount = nativeTools.length;
-        nativeAvailable = true;
-      }
-    } catch (_e) {
-      // getTools() not available or failed
-    }
-
     if (nativeAvailable && nativeToolCount > 0) {
       registeredCountEl.textContent = `${nativeToolCount} Tools Registered (Native WebMCP)`;
     } else {
@@ -782,8 +784,8 @@ async function renderWebMcpInfo() {
     if (avail.isAvailable && state.webMcpStatus.registeredCount > 0) {
       statusBadge.textContent = 'Native WebMCP Active';
       statusBadge.className = 'status-badge status-active';
-      const nativeCount = nativeToolCount > 0 ? nativeToolCount : state.webMcpStatus.registeredCount;
-      statusDesc.innerHTML = `Registered <strong>${nativeCount} tools</strong> directly with <code>document.modelContext.registerTool</code>.`;
+      const displayCount = nativeToolCount > 0 ? nativeToolCount : state.webMcpStatus.registeredCount;
+      statusDesc.innerHTML = `Registered <strong>${displayCount} tools</strong> directly with <code>document.modelContext.registerTool</code>.`;
     } else if (avail.isAvailable) {
       statusBadge.textContent = 'WebMCP Available';
       statusBadge.className = 'status-badge status-harness';
@@ -793,6 +795,9 @@ async function renderWebMcpInfo() {
       statusBadge.className = 'status-badge status-harness';
       statusDesc.innerHTML = 'Native WebMCP (<code>document.modelContext.registerTool</code>) is unavailable in this standard browser runtime. Handrail does <strong>not fake or simulate</strong> the API; the canonical first-party JavaScript registration layer is active and validated through the separated deterministic test harness.';
     }
+  }
+  } catch (err) {
+    console.error('[renderWebMcpInfo] Error rendering WebMCP info:', err);
   }
 }
 
