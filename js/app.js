@@ -38,7 +38,10 @@ import {
   renderReceiptUI,
   setAuditFilter,
   getDecisionBadgeMeta,
+  rehydrateAuditLogs,
 } from './audit.js';
+
+import { exportAuditEntriesJSON, loadAuditEntries } from './audit-db.js';
 
 import {
   toolRegistry,
@@ -105,6 +108,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAuthorityContractControls();
   renderTrustPanel();
   await renderWebMcpInfo();
+
+  // Rehydrate audit log from IndexedDB
+  const rehydratedCount = await rehydrateAuditLogs();
+  if (rehydratedCount > 0) {
+    console.log(`[Init] Rehydrated ${rehydratedCount} audit entries from IndexedDB`);
+  }
 
   // Register callback for native WebMCP execution UI updates
   setPostExecutionCallback((result, toolName) => {
@@ -1569,15 +1578,17 @@ function bindAuditControls() {
   }
 
   if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      clearAuditLogs();
+    clearBtn.addEventListener('click', async () => {
+      await clearAuditLogs();
       announce('Audit log cleared.');
     });
   }
 
   if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(exportAuditLogsAsJSON());
+    exportBtn.addEventListener('click', async () => {
+      // Export from IndexedDB for complete persisted log
+      const json = await exportAuditEntriesJSON();
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(json);
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute('href', dataStr);
       downloadAnchor.setAttribute('download', `handrail-audit-log-${new Date().toISOString().slice(0, 10)}.json`);
@@ -1585,6 +1596,46 @@ function bindAuditControls() {
       downloadAnchor.click();
       downloadAnchor.remove();
       announce('Audit log JSON export initiated.');
+    });
+  }
+
+  // Raw audit log modal
+  const viewRawBtn = document.getElementById('view-raw-audit-btn');
+  const rawAuditModal = document.getElementById('raw-audit-modal');
+  const closeRawAuditModal = document.getElementById('close-raw-audit-modal');
+  const rawAuditTbody = document.getElementById('raw-audit-tbody');
+
+  if (viewRawBtn && rawAuditModal) {
+    viewRawBtn.addEventListener('click', async () => {
+      // Load entries from IndexedDB
+      const entries = await loadAuditEntries();
+      if (rawAuditTbody) {
+        rawAuditTbody.innerHTML = entries.map((entry) => `
+          <tr>
+            <td><code>${entry.id}</code></td>
+            <td>${entry.formattedTime || entry.timestamp || 'N/A'}</td>
+            <td><code>${entry.toolName || 'unknown'}</code></td>
+            <td><span class="audit-decision-badge ${getDecisionBadgeMeta(entry.decision).className}" style="font-size: 0.7rem; padding: 0.1rem 0.3rem;">${getDecisionBadgeMeta(entry.decision).tagText}</span></td>
+            <td title="${(entry.reason || '').replace(/"/g, '&quot;')}">${entry.reason || 'N/A'}</td>
+          </tr>
+        `).join('');
+      }
+      rawAuditModal.style.display = 'flex';
+    });
+  }
+
+  if (closeRawAuditModal && rawAuditModal) {
+    closeRawAuditModal.addEventListener('click', () => {
+      rawAuditModal.style.display = 'none';
+    });
+  }
+
+  // Close modal on overlay click
+  if (rawAuditModal) {
+    rawAuditModal.addEventListener('click', (e) => {
+      if (e.target === rawAuditModal) {
+        rawAuditModal.style.display = 'none';
+      }
     });
   }
 }

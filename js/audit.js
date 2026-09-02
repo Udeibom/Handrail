@@ -2,7 +2,7 @@
  * @file audit.js
  * @description Accessible Structured Audit Trail and Plain-Language Receipt Engine for Handrail.
  *
- * Implements an in-memory session audit log capturing all agent invocations,
+ * Implements a session audit log with IndexedDB persistence, capturing all agent invocations,
  * Handrail deterministic policy decisions, human consent interactions, and results.
  *
  * Explicitly distinguishes:
@@ -12,6 +12,8 @@
  * 4. What actually happened (Execution action / block / denial)
  * 5. The result (Confirmation / error / safety guarantee)
  */
+
+import { persistAuditEntry, loadAuditEntries, clearAuditEntries } from './audit-db.js';
 
 /**
  * @typedef {'allowed' | 'confirmed' | 'denied' | 'blocked' | 'executed'} AuditDecision
@@ -154,6 +156,11 @@ export function logAuditEvent(eventData) {
     auditLogs.pop();
   }
 
+  // Persist to IndexedDB (fire and forget - don't block UI)
+  persistAuditEntry(entry).catch(err => {
+    console.error('[Audit] Failed to persist entry to IndexedDB:', err);
+  });
+
   // Update UI components
   updateAuditLogUI();
   renderReceiptUI(entry);
@@ -204,13 +211,46 @@ export function setAuditFilter(filter) {
 }
 
 /**
- * Clears the in-memory audit log.
+ * Clears the in-memory audit log and IndexedDB.
  */
-export function clearAuditLogs() {
+export async function clearAuditLogs() {
   auditLogs = [];
   nextLogId = 1;
   updateAuditLogUI();
-  renderReceiptUI(null);
+  try {
+    await clearAuditEntries();
+  } catch (err) {
+    console.error('[Audit] Failed to clear IndexedDB entries:', err);
+  }
+}
+
+/**
+ * Rehydrates the in-memory audit log from IndexedDB.
+ * Called on page load to restore persisted entries.
+ * @returns {Promise<number>} Number of entries rehydrated
+ */
+export async function rehydrateAuditLogs() {
+  try {
+    const entries = await loadAuditEntries();
+    if (entries.length > 0) {
+      auditLogs = entries;
+      // Update nextLogId to be higher than any existing ID
+      const maxId = entries.reduce((max, entry) => {
+        const match = entry.id?.match(/^AUDIT-(\d+)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          return num > max ? num : max;
+        }
+        return max;
+      }, 0);
+      nextLogId = maxId + 1;
+      updateAuditLogUI();
+    }
+    return entries.length;
+  } catch (err) {
+    console.error('[Audit] Failed to rehydrate from IndexedDB:', err);
+    return 0;
+  }
 }
 
 /**
