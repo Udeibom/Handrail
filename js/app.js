@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderRefillPreparation();
   renderAuthorityContractControls();
   renderTrustPanel();
-  renderWebMcpInfo();
+  await renderWebMcpInfo();
 
   // Register callback for native WebMCP execution UI updates
   setPostExecutionCallback((result, toolName) => {
@@ -736,7 +736,7 @@ export function renderToolRegistryUI() {
 /**
  * Renders WebMCP registration status info.
  */
-function renderWebMcpInfo() {
+async function renderWebMcpInfo() {
   const statusBadge = document.getElementById('webmcp-status-badge');
   const statusDesc = document.getElementById('webmcp-status-desc');
   const modelContextStatus = document.getElementById('webmcp-modelcontext-status');
@@ -756,9 +756,25 @@ function renderWebMcpInfo() {
   }
 
   if (registeredCountEl) {
-    const primaryCount = WEBMCP_PRIMARY_TOOL_DEFINITIONS.length;
-    const aliasCount = toolRegistry.getAllTools().length - primaryCount;
-    registeredCountEl.textContent = `${primaryCount} Tools Registered${aliasCount > 0 ? ` (+ ${aliasCount} aliases)` : ''} (${avail.isAvailable ? 'Native WebMCP' : 'Test Harness'})`;
+    let nativeToolCount = 0;
+    let nativeAvailable = false;
+    try {
+      if (document.modelContext && typeof document.modelContext.getTools === 'function') {
+        const nativeTools = await document.modelContext.getTools();
+        nativeToolCount = nativeTools.length;
+        nativeAvailable = true;
+      }
+    } catch (_e) {
+      // getTools() not available or failed
+    }
+
+    if (nativeAvailable && nativeToolCount > 0) {
+      registeredCountEl.textContent = `${nativeToolCount} Tools Registered (Native WebMCP)`;
+    } else {
+      const primaryCount = WEBMCP_PRIMARY_TOOL_DEFINITIONS.length;
+      const aliasCount = toolRegistry.getAllTools().length - primaryCount;
+      registeredCountEl.textContent = `${primaryCount} Tools Registered${aliasCount > 0 ? ` (+ ${aliasCount} aliases)` : ''} (Test Harness)`;
+    }
   }
 
   if (statusBadge && statusDesc) {
