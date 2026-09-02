@@ -4,6 +4,16 @@
 
 ---
 
+## The Idea
+
+WebMCP gives AI agents hands. Handrail gives people a say in what those hands are allowed to do.
+
+As websites expose structured tools directly to agents, delegation becomes dramatically more powerful -- but capability is not the same thing as authority. Handrail is an accessibility-first human authority layer for WebMCP: users define deterministic boundaries on what an agent may do, Handrail verifies every invocation against those boundaries, suspicious tools are blocked before they ever reach the user, and consequential actions pause for accessible human approval.
+
+The RefillRx prescription portal is the demonstration environment -- proof that an agent can search, inspect, and prepare refills, but cannot silently exceed the authority a human granted it.
+
+---
+
 ## Overview
 
 **Handrail** is an open-source human-control layer for web-based autonomous AI agents. It has zero runtime dependencies — no React, no Angular, no frontend framework. The entire application is vanilla HTML, CSS, and JavaScript ES modules.
@@ -27,9 +37,13 @@ Autonomous AI agents can execute multi-step workflows rapidly, invoking browser 
 
 ## The Solution
 
-The person that came to my mind when I set out to build this was my classmate Mike, who, although blind, challenged me with his always joyous mood. Watching him navigate the web made me realize how much trust we place in agents acting on our behalf — and how little control users like him have when those agents move fast.
+I grew up with a simple idea of what it means to help someone: when you see someone struggling, you step in. But there's a line between helping and deciding for them -- and that line gets easy to cross once the "helper" is an AI agent that can act in seconds, faster than a person can watch.
 
-Handrail is the control layer I wished existed for Mike. It introduces a 4-layer defense-in-depth model coupled with accessible confirmation and structured provenance receipts:
+Picture yourself managing something important through an agent -- trusting it to search, decide, and act on your behalf and asking: at what point did I stop delegating a task and start surrendering control of the outcome?
+
+Handrail is my answer: delegate the task, keep the authority. A handrail doesn't climb the stairs for you, and it doesn't stop you from climbing. It's just there when you need something to hold onto. That's what this is for agentic computing.
+
+Handrail introduces a 4-layer defense-in-depth model coupled with accessible confirmation and structured provenance receipts:
 
 ```
                       +------------------------------------------+
