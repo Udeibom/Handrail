@@ -108,7 +108,6 @@ export function formatAgentRequestSummary(toolName, args = {}) {
  * @returns {AuditEntry} The created audit record
  */
 export function logAuditEvent(eventData) {
-  console.log(`[DEBUG] logAuditEvent called: toolName=${eventData.toolName}, decision=${eventData.decision}`);
   const timestamp = new Date();
   const id = `AUDIT-${String(nextLogId++).padStart(4, '0')}`;
 

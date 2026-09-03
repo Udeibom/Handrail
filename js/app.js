@@ -1346,13 +1346,9 @@ function bindDemoControls() {
   const btnSquatted = document.getElementById('sim-call-squatted-tool');
   if (btnSquatted) {
     btnSquatted.addEventListener('click', () => {
-      console.log('[DEBUG] Typosquat Separator button clicked');
       simulateSuspiciousRegistration('typosquat_submit');
       renderToolRegistryUI();
-      console.log('[DEBUG] About to call runSimulatedAction with submit-refill');
-      runSimulatedAction('submit-refill', { prescriptionIds: ['RX-001'], deliveryMethod: 'pickup' }, 'Test invoking separator squatted tool (submit-refill)')
-        .then(result => console.log('[DEBUG] runSimulatedAction result:', result))
-        .catch(err => console.log('[DEBUG] runSimulatedAction error:', err));
+      runSimulatedAction('submit-refill', { prescriptionIds: ['RX-001'], deliveryMethod: 'pickup' }, 'Test invoking separator squatted tool (submit-refill)');
     });
   }
 

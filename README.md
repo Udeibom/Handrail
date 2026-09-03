@@ -489,6 +489,41 @@ Three critical properties verified by automated tests — quoted verbatim from `
 
 ---
 
+## What's Next
+
+Handrail is a functional architectural demonstration, not a production system. The current implementation proves the 4-gate consent pipeline works deterministically in the browser, but several meaningful gaps remain between this demo and a real deployment:
+
+### Real Agent Integration
+All "agent actions" today are button clicks in the UI. There is no actual ChatGPT, Gemini, or other LLM invoking tools through Handrail — the demo simulates what an agent *would* do. The next step is wiring Handrail into a real agent loop (e.g., a Chrome extension or local proxy) so tool calls originate from an actual model, not a human clicking a button.
+
+### WebMCP Native Support
+`document.modelContext.registerTool()` does not exist in current Chrome, Firefox, or Safari. The demo detects this and falls back to an internal test harness. When WebMCP ships in browsers, the native registration path needs real-world validation, not just console testing. The fallback will remain useful for development, but the native path is the production target.
+
+### Behavioral Trust Detection
+Gate 1 currently catches typosquatting, separator spoofing, suffix squatting, and known prompt-injection phrases. It does **not** catch a novel tool with a completely benign name and description — that is exactly what the "Benign-Looking Tool" demo scenario proves. A more mature trust check would add behavioral analysis (what the tool *does*, not just what it says) rather than relying solely on metadata pattern matching.
+
+### UI & Integration Tests
+The 143 automated assertions cover the pipeline logic, but there are no tests for DOM rendering, focus trapping, the confirmation dialog, or the full button-to-receipt flow. Adding Playwright or similar integration tests would catch regressions in the accessible UI that unit tests cannot see.
+
+### Persistence Beyond the Audit Log
+The audit trail now survives page reloads via IndexedDB, but pharmacy state (`activePrescriptions`, `submittedRefillOrders`) is still ephemeral. A real deployment would need server-side persistence, session management, and cryptographic signing of audit entries so they cannot be tampered with after the fact.
+
+### Accessibility Validation
+The confirmation dialog was built with screen-reader considerations (focus trapping, `aria-live`, `role="alertdialog"`), but the ~22-second response time measurement comes from informal self-testing, not from actual screen-reader users. A rigorous study with NVDA, JAWS, or VoiceOver users would validate whether the timing and announcements work as intended.
+
+### Production Hardening
+- **No authentication**: Anyone can edit the authority contract. Real use needs identity binding.
+- **No rate limiting**: Rapid repeated tool calls are not throttled.
+- **No replay protection**: The same tool invocation could theoretically be replayed.
+- **No session expiry**: Authority contracts do not time out.
+- **No timeout on confirmation dialog**: If the user never responds, the Promise hangs indefinitely.
+- **Debug logging**: ~14 `[DEBUG]` console statements remain in the production code path and should be removed or gated behind a flag.
+
+### Scope Expansion
+The current tool set is intentionally small (5 primary tools). A real pharmacy portal would need refill history, prescription transfers, insurance adjudication, and provider messaging — each requiring additional authority contract rules and trust heuristics.
+
+---
+
 ## License
 
 Handrail is released under the **MIT License**. See [LICENSE](./LICENSE) for details.
