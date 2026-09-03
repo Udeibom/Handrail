@@ -288,12 +288,12 @@ handrail/
 
 ## WebMCP Environment Testing
 
-Handrail natively integrates with the emerging **WebMCP** (Web Model Context Protocol) specification:
+Handrail natively integrates with the emerging **WebMCP** (Web Model Context Protocol) specification. Native registration and real-agent execution have been tested and confirmed working in Chrome with the WebMCP testing flag enabled (`chrome://flags/#enable-webmcp-testing`) and in ChatGPT's in-app browser.
 
 1. **Native Detection**: On initialization, Handrail checks for `window.modelContext` or `document.modelContext`.
-2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers the 5 primary tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas. (Internal aliases are not registered natively.)
+2. **Tool Registration**: In a WebMCP-capable browser or extension environment, Handrail registers tools via `document.modelContext.registerTool(...)` with canonical JSON input schemas. The 5 primary tools plus the demo adversarial tool (`auto_reorder_assistant`) are registered natively when the API is available.
 3. **Runtime Tool-Change Events**: When WebMCP is available, Handrail listens for `toolchange` events on `document.modelContext` (or falls back to the `ontoolchange` property). Tools registered after session init that are not in the expected tool set are flagged as unexpected and untrusted.
-4. **Browser Fallback**: The live demo at handail.netlify.app runs in standard Chrome/Firefox/Safari, where `document.modelContext` is not yet exposed. Handrail detects this and routes all tool calls through the same 4-gate execution pipeline via an embedded test harness. The security logic is identical — only the event source differs. To test with native WebMCP, run Chrome with experimental flags enabled.
+4. **Browser Fallback**: The live demo at handail.netlify.app runs in standard Chrome/Firefox/Safari, where `document.modelContext` is not yet exposed by default. Handrail detects this and routes all tool calls through the same 4-gate execution pipeline via an embedded test harness. The security logic is identical — only the event source differs.
 
 ---
 
@@ -338,7 +338,7 @@ Can also be deployed directly to **GitHub Pages**, **Vercel**, **Cloudflare Page
 
 ## Verified Test Output
 
-Test suite results captured on **2026-08-30**. To regenerate: `node tests/security-suite.js` and `node tests/authority-tests.js`.
+Test suite results captured on **2026-09-03**. To regenerate: `node tests/security-suite.js` and `node tests/authority-tests.js`.
 
 > **Note on reading the output**: Each test name is a security property being verified. Messages like "Confirmation contacted: false" mean the test confirmed that the human confirmation dialog was NOT invoked — this is the expected behavior for read-only or blocked actions.
 
@@ -379,7 +379,7 @@ Lightweight, dependency-free test runner exercising actual security-critical fun
   ✓ User denial: Consequential action halted safely with DENIED verdict and zero state mutation
        Verdict: DENIED, Refills remaining: 2
   ✓ Successful approval & refill execution: Order committed, refills decremented, confirmation receipt generated
-       Receipt: RX-CONF-978054, Refills remaining: 1 (decremented by 1)
+       Receipt: RX-CONF-525678, Refills remaining: 1 (decremented by 1)
   ✓ Confirmation unavailable: Fails closed safely and NEVER converts to approval
        Verdict: DENIED, Error: Action denied by human user (Confirmation unavailable (Headless / non-DOM environment with no confirmation provider configured). Failing closed.).
 
@@ -496,10 +496,10 @@ Handrail is a functional architectural demonstration, not a production system. T
 A fuller, section-by-section accounting of these boundaries is in [LIMITATIONS.md](./LIMITATIONS.md). The summary below is the high-level roadmap:
 
 ### Real Agent Integration
-All "agent actions" today are button clicks in the UI. There is no actual ChatGPT, Gemini, or other LLM invoking tools through Handrail — the demo simulates what an agent *would* do. The next step is wiring Handrail into a real agent loop (e.g., a Chrome extension or local proxy) so tool calls originate from an actual model, not a human clicking a button.
+Native WebMCP registration and real-agent-driven execution have been verified live: ChatGPT's in-app browser correctly triggered search, staging, submission, and the security-trap block via natural-language requests, and Gemini via Google's Model Context Tool Inspector executed the benign-looking-tool scenario end-to-end (Gate 1 passed, Gate 2 correctly blocked). What remains open is broader testing across more agents and browsers, and moving beyond manual verification to automated integration tests of the agent-driven path.
 
 ### WebMCP Native Support
-`document.modelContext.registerTool()` does not exist in current Chrome, Firefox, or Safari. The demo detects this and falls back to an internal test harness. When WebMCP ships in browsers, the native registration path needs real-world validation, not just console testing. The fallback will remain useful for development, but the native path is the production target.
+Native support is available today behind Chrome's WebMCP testing flag (`chrome://flags/#enable-webmcp-testing`) and in ChatGPT's in-app browser — both verified. Broader default availability across stable browser channels is still emerging, and the fallback test harness remains active in standard Chrome/Firefox/Safari.
 
 ### Behavioral Trust Detection
 Gate 1 currently catches typosquatting, separator spoofing, suffix squatting, and known prompt-injection phrases. It does **not** catch a novel tool with a completely benign name and description — that is exactly what the "Benign-Looking Tool" demo scenario proves. A more mature trust check would add behavioral analysis (what the tool *does*, not just what it says) rather than relying solely on metadata pattern matching.
